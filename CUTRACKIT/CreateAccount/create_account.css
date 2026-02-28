@@ -95,7 +95,7 @@ html, body {
     100% { background-position: 0% 50%; }
 }
 
-/* CENTER CONTAINER */
+/* CONTAINER */
 .create-container {
     height: 100vh;
     display: flex;
@@ -106,7 +106,7 @@ html, body {
 
 /* GLASS CARD */
 .create-card {
-    width: 420px;
+    width: 380px;
     padding: 40px 35px;
     background: rgba(255, 255, 255, 0.18);
     border-radius: 18px;
@@ -149,7 +149,7 @@ label {
 
 input {
     width: 100%;
-    box-sizing: border-box; /* match button width exactly */
+    box-sizing: border-box;
     margin-top: 6px;
     padding: 12px 14px;
     border-radius: 10px;
@@ -165,22 +165,7 @@ input:focus {
     box-shadow: 0 0 8px rgba(255,255,255,0.6);
 }
 
-/* PASSWORD TOGGLE */
-.password-wrapper {
-    position: relative;
-}
-
-.toggle-password {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    font-size: 18px;
-}
-
 /* BUTTON */
-/* buttons already fill card width; inputs use same box-sizing above */
 .create-btn {
     width: 100%;
     padding: 12px;
@@ -220,4 +205,50 @@ input:focus {
     color: #fff;
     font-weight: 600;
     text-decoration: underline;
+}
+
+/* Mobile navbar optimization */
+@media (max-width: 600px) {
+  .navbar {
+    flex-direction: column;
+    align-items: center;
+    height: auto;
+    padding: 10px;
+  }
+
+  .logo-container {
+    justify-content: center;
+  }
+
+  .logo img {
+    width: 120px !important;
+    max-width: 80vw;
+  }
+
+  .company-name {
+    font-size: 24px !important;
+    text-align: center;
+  }
+
+  .menu {
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .menu a {
+    font-size: 14px !important;
+    padding: 4px 6px;
+  }
+
+  .create-card {
+    width: 90% !important;
+    max-width: 350px !important;
+    margin: 0 auto;
+  }
+
+  /* adjust create container padding to account for vertical navbar */
+  .create-container {
+    padding-top: 0 !important;
+  }
 }
