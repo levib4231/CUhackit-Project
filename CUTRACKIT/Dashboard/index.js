@@ -22,6 +22,41 @@ prevBtn.addEventListener("click", () => {
     }
 });
 
+async function populateGymDropdown() {
+    try {
+        // 1. Fetch gym names from your 'Courts' table
+        const { data, error } = await supabaseClient
+            .from('Courts') 
+            .select('name')
+            .order('name', { ascending: true });
+
+        if (error) throw error;
+
+        const gymSelect = document.getElementById('gymSelect');
+        
+        if (gymSelect && data) {
+            // 2. Clear existing hardcoded options except the first "Select Court"
+            gymSelect.innerHTML = '<option value="">Select Court</option>';
+
+            // 3. Loop through data and create new options
+            data.forEach(gym => {
+                const option = document.createElement('option');
+                option.value = gym.name;
+                option.textContent = gym.name;
+                gymSelect.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading gyms:', error.message);
+    }
+}
+
+// Update your DOMContentLoaded listener to include this new function
+document.addEventListener('DOMContentLoaded', () => {
+    fetchPlayerCount();
+    populateGymDropdown();
+});
+
 // Fetch live player count
 // Initialize Supabase client
 // You get these from your Supabase Project Settings > API
