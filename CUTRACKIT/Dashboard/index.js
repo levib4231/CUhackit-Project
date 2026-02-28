@@ -176,43 +176,34 @@ async function handleToggleCheckIn() {
         return;
     }
 
-    // 1. Map Auth UUID to Profile ID
-    // We use .maybeSingle() to avoid the 406 error if the row is missing
-    let { data: profile, error: profileError } = await supabaseClient
+    // 1. Get the Profile ID (bigint) using the auth UUID
+    const { data: profile, error: profileError } = await supabaseClient
         .from('Profiles')
         .select('id')
         .eq('auth_id', user.id)
         .maybeSingle();
 
-    // 2. If profile is missing, create it on the fly
-    if (!profile) {
-        console.warn("Profile missing. Creating one now...");
-        const { data: newProfile, error: createError } = await supabaseClient
-            .from('Profiles')
-            .insert([{ 
-                auth_id: user.id, 
-                email: user.email,
-                fname: user.user_metadata?.first_name || 'New',
-                lname: user.user_metadata?.last_name || 'User'
-            }])
-            .select()
-            .single();
-
-        if (createError) {
-            console.error("Could not create profile:", createError.message);
-            alert("Database Error: Profile record missing.");
-            return;
-        }
-        profile = newProfile;
+    if (profileError || !profile) {
+        console.error("Profile not found for this user:", profileError);
+        alert("Error: Profile record not found.");
+        return;
     }
 
-    // 3. Check for an active session
-    const { data: activeSession } = await supabaseClient
+    // From here on, we use profile.id (the bigint ID)
+    const profileId = profile.id;
+
+    // 2. Check for an active session using the numeric profileId
+    const { data: activeSession, error: sessionError } = await supabaseClient
         .from('Sessions')
         .select('id, court_id')
-        .eq('user_id', profile.id)
+        .eq('user_id', profileId)
         .is('check_out_at', null)
         .maybeSingle();
+
+    if (sessionError) {
+        console.error("Session lookup error:", sessionError);
+        return;
+    }
 
     if (activeSession) {
         // --- ACTION: CHECK OUT ---
@@ -226,13 +217,15 @@ async function handleToggleCheckIn() {
             checkInBtn.textContent = "Check In";
             await updatePlayerCountUI();
             alert("Checked out successfully!");
+        } else {
+            console.error("Update error:", updateError.message);
         }
     } else {
         // --- ACTION: CHECK IN ---
         const { error: insertError } = await supabaseClient
             .from('Sessions')
             .insert([{ 
-                user_id: profile.id, 
+                user_id: profileId, 
                 court_id: courtId, 
                 check_in_at: new Date().toISOString() 
             }]);
@@ -242,6 +235,8 @@ async function handleToggleCheckIn() {
             checkInBtn.textContent = "Check Out";
             await updatePlayerCountUI();
             alert("Checked in successfully!");
+        } else {
+            console.error("Insert error:", insertError.message);
         }
     }
 }
