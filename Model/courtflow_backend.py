@@ -467,7 +467,37 @@ def handle_checkout_and_analyze(qr_id, video_file):
             "highlights_found": len(highlights),
             "clips": highlights[:3] # Return top 3 clips for the UI
         }
+    
+def join_team(user_id: int, team_name: str):
+    """Adds a user to a team by name."""
+    try:
+        # 1. Get the Team ID
+        team = supabase.table("Teams").select("id").eq("name", team_name).single().execute()
+        if not team.data:
+            return {"success": False, "message": "Team not found."}
+        
+        # 2. Insert Membership
+        response = supabase.table("Memberships").insert({
+            "user_id": user_id,
+            "team_id": team.data['id']
+        }).execute()
+        
+        return {"success": True, "message": f"Joined {team_name}!"}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
+def leave_team(user_id: int, team_id: int):
+    """Removes a user from a specific team."""
+    try:
+        response = supabase.table("Memberships") \
+            .delete() \
+            .eq("user_id", user_id) \
+            .eq("team_id", team_id) \
+            .execute()
+        
+        return {"success": True, "message": "Left the team."}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 # =====================================================
 # PRODUCTION SERVER
