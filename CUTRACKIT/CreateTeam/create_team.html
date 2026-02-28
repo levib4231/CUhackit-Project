@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Team</title>
+    <link rel="stylesheet" href="create_team.css">
+</head>
+<body>
+
+<!-- NAVBAR stays fixed at the top -->
+ <div class="navbar">
+    <div class="logo-container">
+        <div class="logo">
+            <img src="/CUTRACKIT/Assets/Clemson_Logo.png" alt="">
+        </div>
+        <div class="company-name">CUTRACKIT</div>
+    </div>
+
+    <div class="menu">
+        <a href="/CUTRACKIT/Dashboard/index.html">Dashboard</a>
+        <a href="/CUTRACKIT/FindAMatch/find_a_match.html" class="active">Find Game</a>
+        <a href="/CUTRACKIT/JoinTeam/join_team.html">Join Team</a>
+        <a href="#">Create Team</a>
+        <a href="/CUTRACKIT/LeaderBoards/leaderboards.html">Leader Boards</a>
+        <a href="/CUTRACKIT/Account/account.html">Account</a>
+        <a href="/CUTRACKIT/Login/login.html" class="logout-btn">Logout</a>
+    </div>
+</div>
+
+
+<div class="create-team-page">
+
+    <h1 class="page-title">Create a Team</h1>
+
+    <div class="form-and-preview">
+
+        <!-- FORM CARD -->
+        <div class="form-card">
+            <h2>Create New Team</h2>
+
+            <label>Team Name</label>
+            <input type="text" id="teamName" placeholder="Enter team name">
+
+            <label>Team Size</label>
+            <select id="teamSize">
+                <option value="5v5">5v5</option>
+                <option value="4v4">4v4</option>
+                <option value="3v3">3v3</option>
+                <option value="2v2">2v2</option>
+                <option value="1v1">1v1</option>
+            </select>
+
+            <label>Description</label>
+            <textarea id="teamDescription" placeholder="Describe your team..."></textarea>
+
+            <label>Tags (optional)</label>
+            <input type="text" id="teamTags" placeholder="e.g. competitive, casual">
+
+            <button id="createTeamBtn">Create Team</button>
+
+            <p class="error-msg" id="errorMsg"></p>
+        </div>
+
+        <!-- PREVIEW CARD -->
+        <div class="preview-card">
+            <h2>Preview</h2>
+
+            <div class="preview-content">
+                <h3 id="previewName">Team Name</h3>
+                <p id="previewSize">Team Size: 5v5</p>
+                <p id="previewDesc">Description will appear here.</p>
+                <p id="previewTags"></p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal" id="successModal">
+    <div class="modal-content">
+        <h2>Team Created!</h2>
+        <p>Your team has been added to the Join Team page.</p>
+        <button id="closeModal">Close</button>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="create_team.js"></script></body>
+</html>

@@ -1,6 +1,7 @@
 import os
 from twelvelabs import TwelveLabs
 from dotenv import load_dotenv
+import supabase
 
 load_dotenv()
 
@@ -49,5 +50,31 @@ class TwelveLabsBranch:
             type="summary"
         )
         return res.summary
+
+
+    def update_leaderboard_from_video(self, user_id, session_id, action="making a basket"):
+        """
+        Finds actions in video and awards points in the DB.
+        """
+        # 1. Search TwelveLabs for the action
+        # We query for the specific user's actions in the session footage
+        results = self.client.search.query(
+            index_id=self.index_id,
+            query_text=action,
+            options=["visual"]
+        )
+        
+        # 2. For every highlight found, add 2 points to the DB
+        points_to_add = len(results.data) * 2
+        
+        if points_to_add > 0:
+            supabase.table("Stats").insert({
+                "user_id": user_id,
+                "session_id": session_id,
+                "action_type": action,
+                "points": points_to_add
+            }).execute()
+            
+        return points_to_add
     
     

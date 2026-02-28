@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Game</title>
+    <link rel="stylesheet" href="find_a_match.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+    <div class="logo-container">
+        <div class="logo">
+            <img src="/CUTRACKIT/Assets/Clemson_Logo.png" alt="">
+        </div>
+        <div class="company-name">CUTRACKIT</div>
+    </div>
+
+    <div class="menu">
+        <a href="/CUTRACKIT/Dashboard/index.html">Dashboard</a>
+        <a href="/CUTRACKIT/FindAMatch/find_a_match.html" class="active">Find Game</a>
+        <a href="/CUTRACKIT/JoinTeam/join_team.html">Join Team</a>
+        <a href="/CUTRACKIT/CreateTeam/create_team.html">Create Team</a>
+        <a href="/CUTRACKIT/LeaderBoards/leaderboards.html">Leader Boards</a>
+        <a href="/CUTRACKIT/Account/account.html">Account</a>
+        <a href="/CUTRACKIT/Login/login.html" class="logout-btn">Logout</a>
+
+
+    </div>
+</div>
+
+<!-- PAGE CONTENT -->
+<div class="find-game-page">
+
+    <h1 class="page-title">Find a Game</h1>
+
+    <div class="matchmaking-layout">
+
+        <!-- JOIN MATCHES CARD -->
+        <div class="join-card">
+            <h2>Available Matches</h2>
+            <div id="matchList" class="match-list">
+                <!-- Matches injected by JS -->
+            </div>
+        </div>
+
+        <!-- CREATE MATCH CARD -->
+        <div class="create-card">
+            <h2>Create a Match</h2>
+
+            <label>Match Type</label>
+            <select id="matchType">
+                <option value="1v1">1v1</option>
+                <option value="2v2">2v2</option>
+                <option value="3v3">3v3</option>
+                <option value="4v4">4v4</option>
+                <option value="5v5">5v5</option>
+            </select>
+
+            <label>Date</label>
+            <input type="date" id="matchDate">
+
+            <label>Time</label>
+            <input type="time" id="matchTime">
+
+            <label>Notes (optional)</label>
+            <textarea id="matchNotes" placeholder="Gym availability, rules, etc."></textarea>
+
+            <button id="publishMatchBtn" class="publish-btn">Publish Match</button>
+
+            <p id="createMsg" class="create-msg"></p>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="find_a_match.js"></script>
+</body>
+</html>
