@@ -3,6 +3,3 @@ flask-cors
 psycopg2-binary
 supabase
 python-dotenv
-Flask-Cors
-PyJWT
-cryptography

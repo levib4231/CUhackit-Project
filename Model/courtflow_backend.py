@@ -48,33 +48,31 @@ DB_CONFIG = {
 def get_db_connection():
     return psycopg2.connect(**DB_CONFIG)
 
-
-@app.errorhandler(AuthError)
-def handle_auth_error(ex):
-    response = jsonify(ex.error)
-    response.status_code = ex.status_code
-    return response
-
 # =====================================================
-# HELPER: GET PROFILE ID FROM AUTH0 TOKEN
+# HELPER: GET PROFILE ID FROM SUPABASE TOKEN
 # =====================================================
-from auth0_verify import verify_jwt, get_token_auth_header, AuthError
-
 def get_profile_id_from_token():
     """
     1. Extract Bearer token
-    2. Validate with Auth0
-    3. Get user user_id (sub)
-    4. Map to Profiles.auth_id
+    2. Validate with Supabase
+    3. Get user UUID
+    4. Map to Profiles.id
     """
+
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        return None
+
     try:
-        token = get_token_auth_header(request)
-        payload = verify_jwt(token)
-        
-        # Auth0 user ID is in the 'sub' claim
-        auth_uuid = payload.get("sub")
-        if not auth_uuid:
+        token = auth_header.split(" ")[1]
+
+        # Validate token with Supabase
+        user = supabase.auth.get_user(token)
+
+        if not user:
             return None
+
+        auth_uuid = user.user.id
 
         # Map UUID to Profiles.id
         conn = get_db_connection()
@@ -95,10 +93,7 @@ def get_profile_id_from_token():
 
         return result[0]
 
-    except AuthError:
-        return None
-    except Exception as e:
-        print(f"Error getting profile ID: {e}")
+    except Exception:
         return None
 
 # =====================================================
@@ -309,194 +304,6 @@ def get_court_status(court_id):
             ]
         })
 
-    finally:
-        cursor.close()
-        conn.close()
-
-
-# =====================================================
-# SYNC PROFILE AFTER AUTH0 LOGIN
-# =====================================================
-@app.route("/sync_profile", methods=["POST"])
-def sync_profile():
-    """
-    Called by the frontend after a successful Auth0 login.
-    Creates a row in the Profiles table if one doesn't exist for this Auth0 user.
-    """
-    try:
-        # Require a valid Auth0 token
-        token = get_token_auth_header(request)
-        payload = verify_jwt(token)
-        
-        auth_uuid = payload.get("sub")
-        if not auth_uuid:
-            return jsonify({"error": "Invalid token payload, missing sub"}), 400
-            
-    except AuthError as e:
-        return jsonify(e.error), e.status_code
-    except Exception as e:
-        return jsonify({"error": str(e)}), 401
-
-    data = request.get_json() or {}
-    email = data.get("email", "")
-    fname = data.get("fname", "")
-    lname = data.get("lname", "")
-
-    # Fallback to defaults if missing parts
-    if not fname and not lname and email:
-        parts = email.split("@")[0].split(".")
-        fname = parts[0].capitalize() if parts else "User"
-        lname = parts[1].capitalize() if len(parts) > 1 else ""
-    elif not fname:
-        fname = "User"
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    try:
-        conn.autocommit = False
-
-        # Check if profile already exists
-        cursor.execute("""
-            SELECT id FROM public."Profiles"
-            WHERE auth_id = %s;
-        """, (auth_uuid,))
-
-        if cursor.fetchone():
-            return jsonify({"message": "Profile already exists"})
-
-        # Generate a QR token (just a placeholder format for now)
-        import os
-        qr_token = f"QR-{fname[0] if fname else 'X'}{lname[0] if lname else 'X'}-{os.urandom(2).hex()}"
-
-        # Insert new profile
-        cursor.execute("""
-            INSERT INTO public."Profiles" (auth_id, email, fname, lname, qr_code_token)
-            VALUES (%s, %s, %s, %s, %s)
-            RETURNING id;
-        """, (auth_uuid, email, fname, lname, qr_token))
-        
-        new_id = cursor.fetchone()[0]
-        conn.commit()
-
-        return jsonify({"message": "Profile created successfully", "profile_id": new_id})
-
-    except Exception as e:
-        conn.rollback()
-        return jsonify({"error": str(e)}), 500
-    finally:
-        cursor.close()
-        conn.close()
-
-# =====================================================
-# GET CURRENT PROFILE ID
-# =====================================================
-@app.route("/api/my_profile_id", methods=["GET"])
-def get_my_profile_id():
-    user_id = get_profile_id_from_token()
-    if not user_id:
-        return jsonify({"error": "Unauthorized"}), 401
-    return jsonify({"profile_id": user_id})
-
-# =====================================================
-# TEAM ENDPOINTS
-# =====================================================
-@app.route("/api/create_team", methods=["POST"])
-def create_team():
-    user_id = get_profile_id_from_token()
-    if not user_id:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    data = request.get_json()
-    name = data.get("name")
-    team_size = data.get("team_size")
-    description = data.get("description")
-    tags = data.get("tags")
-
-    if not name:
-        return jsonify({"error": "Team name required"}), 400
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    try:
-        conn.autocommit = False
-
-        # Check if team name already exists
-        cursor.execute("""
-            SELECT id FROM "Teams"
-            WHERE name = %s;
-        """, (name,))
-
-        if cursor.fetchone():
-            return jsonify({"error": "Team name already exists"}), 400
-
-        # Insert new team
-        cursor.execute("""
-            INSERT INTO "Teams" (name, team_size, description, tags, coach_id)
-            VALUES (%s, %s, %s, %s, %s)
-            RETURNING id;
-        """, (name, team_size, description, tags, user_id))
-        
-        team_id = cursor.fetchone()[0]
-        
-        # Add creator to user_team table (Memberships assumed based on frontend code)
-        cursor.execute("""
-            INSERT INTO "Memberships" (team_id, user_id)
-            VALUES (%s, %s);
-        """, (team_id, user_id))
-
-        conn.commit()
-
-        return jsonify({"message": "Team created successfully", "team_id": team_id})
-
-    except Exception as e:
-        conn.rollback()
-        return jsonify({"error": str(e)}), 500
-    finally:
-        cursor.close()
-        conn.close()
-
-@app.route("/api/join_team", methods=["POST"])
-def api_join_team_auth0():
-    user_id = get_profile_id_from_token()
-    if not user_id:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    data = request.get_json()
-    team_id = data.get("team_id")
-
-    if not team_id:
-        return jsonify({"error": "Team ID required"}), 400
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    try:
-        conn.autocommit = False
-        
-        # Check if already a member
-        cursor.execute("""
-            SELECT 1 FROM "Memberships"
-            WHERE team_id = %s AND user_id = %s;
-        """, (team_id, user_id))
-        
-        if cursor.fetchone():
-             return jsonify({"error": "You are already in this team!"}), 400
-
-        # Create membership
-        cursor.execute("""
-            INSERT INTO "Memberships" (team_id, user_id)
-            VALUES (%s, %s);
-        """, (team_id, user_id))
-
-        conn.commit()
-
-        return jsonify({"message": "Successfully joined team!"})
-
-    except Exception as e:
-        conn.rollback()
-        return jsonify({"error": str(e)}), 500
     finally:
         cursor.close()
         conn.close()
