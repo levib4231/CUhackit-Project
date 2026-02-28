@@ -170,29 +170,46 @@ async function handleToggleCheckIn() {
         return;
     }
 
-    // 1. Get the authenticated user
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
     if (authError || !user) {
         alert("You must be logged in.");
         return;
     }
 
-    // 2. Map Auth UUID to Profile ID (BigInt) from your schema
-    const { data: profile, error: profileError } = await supabaseClient
+    // 1. Map Auth UUID to Profile ID
+    // We use .maybeSingle() to avoid the 406 error if the row is missing
+    let { data: profile, error: profileError } = await supabaseClient
         .from('Profiles')
         .select('id')
         .eq('auth_id', user.id)
-        .single();
+        .maybeSingle();
 
-    if (profileError || !profile) {
-        console.error("Profile not found:", profileError);
-        return;
+    // 2. If profile is missing, create it on the fly
+    if (!profile) {
+        console.warn("Profile missing. Creating one now...");
+        const { data: newProfile, error: createError } = await supabaseClient
+            .from('Profiles')
+            .insert([{ 
+                auth_id: user.id, 
+                email: user.email,
+                fname: user.user_metadata?.first_name || 'New',
+                lname: user.user_metadata?.last_name || 'User'
+            }])
+            .select()
+            .single();
+
+        if (createError) {
+            console.error("Could not create profile:", createError.message);
+            alert("Database Error: Profile record missing.");
+            return;
+        }
+        profile = newProfile;
     }
 
-    // 3. Check for an active session (where check_out_at is NULL)
+    // 3. Check for an active session
     const { data: activeSession } = await supabaseClient
         .from('Sessions')
-        .select('id')
+        .select('id, court_id')
         .eq('user_id', profile.id)
         .is('check_out_at', null)
         .maybeSingle();
@@ -207,7 +224,6 @@ async function handleToggleCheckIn() {
         if (!updateError) {
             statusText.textContent = "Status: Inactive";
             checkInBtn.textContent = "Check In";
-            checkInBtn.classList.remove('checkout-active'); // Optional CSS class change
             await updatePlayerCountUI();
             alert("Checked out successfully!");
         }
@@ -224,15 +240,11 @@ async function handleToggleCheckIn() {
         if (!insertError) {
             statusText.textContent = "Status: Checked In";
             checkInBtn.textContent = "Check Out";
-            checkInBtn.classList.add('checkout-active');
             await updatePlayerCountUI();
             alert("Checked in successfully!");
-        } else {
-            console.error("Check-in failed:", insertError.message);
         }
     }
 }
-
 // ============================
 // Initialization
 // ============================
