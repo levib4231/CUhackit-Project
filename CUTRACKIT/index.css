@@ -1,0 +1,7 @@
+.topbar {
+    min-height: 64px;
+}
+
+.nav-link:hover {
+    text-decoration: underline;
+}
