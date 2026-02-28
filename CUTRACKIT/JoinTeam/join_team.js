@@ -32,13 +32,13 @@ function renderTeams() {
 
     let filtered = teams.filter(team => {
         return (currentFilter === "all" || team.size === currentFilter) &&
-               team.name.toLowerCase().includes(currentSearch.toLowerCase());
+            team.name.toLowerCase().includes(currentSearch.toLowerCase());
     });
 
-    if (currentSort === "most") filtered.sort((a,b) => b.members - a.members);
-    if (currentSort === "least") filtered.sort((a,b) => a.members - b.members);
-    if (currentSort === "newest") filtered.sort((a,b) => b.created - a.created);
-    if (currentSort === "oldest") filtered.sort((a,b) => a.created - b.created);
+    if (currentSort === "most") filtered.sort((a, b) => b.members - a.members);
+    if (currentSort === "least") filtered.sort((a, b) => a.members - b.members);
+    if (currentSort === "newest") filtered.sort((a, b) => b.created - a.created);
+    if (currentSort === "oldest") filtered.sort((a, b) => a.created - b.created);
 
     filtered.forEach(team => {
         const card = document.createElement("div");
@@ -72,10 +72,31 @@ closeModal.addEventListener("click", () => {
 });
 
 // Join team
-modalJoinBtn.addEventListener("click", () => {
-    selectedTeam.members++;
-    saveTeams();
-    renderTeams();
+modalJoinBtn.addEventListener("click", async () => {
+    try {
+        const response = await fetch('/api/join_team', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            // Assuming user_id is 1 for testing purposes until auth is built
+            body: JSON.stringify({ user_id: 1, team_name: selectedTeam.name })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            alert(data.message || `Successfully joined ${selectedTeam.name}!`);
+            selectedTeam.members++;
+            saveTeams();
+            renderTeams();
+        } else {
+            alert(data.message || data.error || "Failed to join team.");
+        }
+    } catch (error) {
+        console.error("Error joining team:", error);
+        alert("An error occurred while joining the team.");
+    }
+
     modal.style.display = "none";
 });
 
