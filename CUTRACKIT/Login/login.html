@@ -39,20 +39,8 @@
         <h1 class="login-title">Welcome Back</h1>
         <p class="login-subtitle">Sign in to continue</p>
 
-        <div class="input-group">
-            <label>Email</label>
-            <input type="email" id="emailInput" placeholder="Enter your email">
-        </div>
-
-        <div class="input-group">
-            <label>Password</label>
-            <div class="password-wrapper">
-                <input type="password" id="passwordInput" placeholder="Enter your password">
-                <span id="togglePassword" class="toggle-password">👁️</span>
-            </div>
-        </div>
-
-        <button id="loginBtn" class="login-btn">Login</button>
+        
+        <button id="loginBtn" class="login-btn" style="margin-top: 2rem;">Login with Auth0</button>
 
         <p class="error-msg" id="errorMsg"></p>
 
@@ -61,6 +49,7 @@
     </div>
 </div>
 
+<script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
 <script src="login.js"></script>
 </body>
 </html>

@@ -40,33 +40,8 @@
         <h1 class="create-title">Create Account</h1>
         <p class="create-subtitle">Join the Clemson community</p>
 
-        <div class="input-group">
-            <label>Full Name</label>
-            <input type="text" id="nameInput" placeholder="Enter your name">
-        </div>
-
-        <div class="input-group">
-            <label>Email</label>
-            <input type="email" id="emailInput" placeholder="Enter your email">
-        </div>
-
-        <div class="input-group">
-            <label>Password</label>
-            <div class="password-wrapper">
-                <input type="password" id="passwordInput" placeholder="Create a password">
-                <span id="togglePassword" class="toggle-password">👁️</span>
-            </div>
-        </div>
-
-        <div class="input-group">
-            <label>Confirm Password</label>
-            <div class="password-wrapper">
-                <input type="password" id="confirmPasswordInput" placeholder="Confirm password">
-                <span id="toggleConfirm" class="toggle-password">👁️</span>
-            </div>
-        </div>
-
-        <button id="createBtn" class="create-btn">Create Account</button>
+        
+        <button id="createBtn" class="create-btn" style="margin-top: 2rem;">Create Account with Auth0</button>
 
         <p class="error-msg" id="errorMsg"></p>
 
@@ -74,7 +49,6 @@
 
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+<script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
 <script src="create_account.js"></script></body>
 </html>

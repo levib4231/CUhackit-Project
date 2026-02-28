@@ -1,55 +1,32 @@
-// Clear any old custom tokens
-window.addEventListener('DOMContentLoaded', () => {
-    localStorage.removeItem('cutrackit_jwt');
-    localStorage.removeItem('cutrackit_user_id');
-    localStorage.removeItem('cutrackit_profile');
-});
+// Auth0 Login Handle
+const auth0Domain = "dev-scz0be2kycl7oqlb.us.auth0.com";
+const auth0ClientId = "vK85nT8Su7VG1C9DrSDiGvgqkGpNzVfd";
+const auth0Audience = "https://dev-scz0be2kycl7oqlb.us.auth0.com/api/v2/";
 
-const emailInput = document.getElementById("emailInput");
-const passwordInput = document.getElementById("passwordInput");
-const loginBtn = document.getElementById("loginBtn");
-const errorMsg = document.getElementById("errorMsg");
-const togglePassword = document.getElementById("togglePassword");
+let auth0Client = null;
 
-// Show/Hide Password
-togglePassword.addEventListener("click", () => {
-    const type = passwordInput.type === "password" ? "text" : "password";
-    passwordInput.type = type;
-});
-
-// Login using Supabase Auth
-loginBtn.addEventListener("click", async () => {
-
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-
-    if (!email || !password) {
-        errorMsg.style.color = "#ff4d4d";
-        errorMsg.textContent = "Please fill out all fields.";
-        return;
-    }
-
-    errorMsg.style.color = "white";
-    errorMsg.textContent = "Logging in...";
-
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password
+window.addEventListener('DOMContentLoaded', async () => {
+    // Clear old tokens for Supabase just in case
+    localStorage.removeItem('access_token');
+    
+    // Initialize Auth0
+    auth0Client = await createAuth0Client({
+        domain: auth0Domain,
+        client_id: auth0ClientId,
+        audience: auth0Audience,
+        redirect_uri: window.location.origin + "/CUTRACKIT/Dashboard/index.html"
     });
 
-    if (error) {
-        errorMsg.style.color = "#ff4d4d";
-        errorMsg.textContent = error.message;
-        return;
-    }
-
-    // Store access token for backend usage
-    localStorage.setItem("access_token", data.session.access_token);
-
-    errorMsg.style.color = "#00ff99";
-    errorMsg.textContent = "Login successful! Redirecting...";
-
-    setTimeout(() => {
-        window.location.href = "dashboard.html";
-    }, 500);
+    const loginBtn = document.getElementById("loginBtn");
+    
+    // Redirect to Auth0 Universal Login
+    loginBtn.addEventListener("click", async () => {
+        const errorMsg = document.getElementById("errorMsg");
+        errorMsg.style.color = "white";
+        errorMsg.textContent = "Redirecting to login...";
+        
+        await auth0Client.loginWithRedirect({
+            redirect_uri: window.location.origin + "/CUTRACKIT/Dashboard/index.html"
+        });
+    });
 });

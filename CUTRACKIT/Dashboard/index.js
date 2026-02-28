@@ -1,3 +1,82 @@
+
+// Auth0 Configuration
+const auth0Domain = "dev-scz0be2kycl7oqlb.us.auth0.com";
+const auth0ClientId = "vK85nT8Su7VG1C9DrSDiGvgqkGpNzVfd";
+const auth0Audience = "https://dev-scz0be2kycl7oqlb.us.auth0.com/api/v2/";
+
+let auth0Client = null;
+let accessToken = null;
+
+async function initAuth() {
+    auth0Client = await createAuth0Client({
+        domain: auth0Domain,
+        client_id: auth0ClientId,
+        audience: auth0Audience,
+        redirect_uri: window.location.origin + "../Dashboard/index.html"
+    });
+
+    // Check if handling a callback from Auth0
+    if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+        await auth0Client.handleRedirectCallback();
+        window.history.replaceState({}, document.title, "../Dashboard/index.html");
+    }
+
+    // Check if user is authenticated
+    const isAuthenticated = await auth0Client.isAuthenticated();
+    
+    if (!isAuthenticated) {
+        // Redirect to login if not authenticated
+        window.location.replace("../Login/login.html");
+        return;
+    }
+
+    // Get the access token for API calls
+    accessToken = await auth0Client.getTokenSilently();
+    localStorage.setItem("access_token", accessToken);
+
+    // Get user info and sync with backend
+    const user = await auth0Client.getUser();
+    await syncProfile(user);
+}
+
+async function syncProfile(user) {
+    try {
+        const response = await fetch(`${BACKEND_URL}/sync_profile`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({
+                email: user.email,
+                fname: user.given_name || "",
+                lname: user.family_name || ""
+            })
+        });
+        const data = await response.json();
+        console.log("Profile Sync:", data);
+    } catch (error) {
+        console.error("Error syncing profile:", error);
+    }
+}
+
+// Intercept fetch requests to add Authorization header
+const originalFetch = window.fetch;
+window.fetch = async function() {
+    let [resource, config] = arguments;
+    
+    if (typeof resource === 'string' && resource.includes(BACKEND_URL) && accessToken) {
+        config = config || {};
+        config.headers = config.headers || {};
+        config.headers['Authorization'] = `Bearer ${accessToken}`;
+    }
+    
+    return originalFetch(resource, config);
+};
+
+// Start Auth Process when DOM is ready
+window.addEventListener('DOMContentLoaded', initAuth);
+
 // Supabase client
 const supabaseUrl = 'https://cixuwmqjrcubiwhgnvlf.supabase.co';
 const supabaseKey = 'sb_publishable_Miz7VAu62K_pZsVZHnGHWQ_7BUVDWmx';
