@@ -1,7 +1,7 @@
 import qrcode # type: ignore
 
 # Data you want to encode
-data = "https://gemini.google.com/app/760c6c6a51d39343"
+data = "http://127.0.0.1:5500/CUTRACKIT/Dashboard/index.html"
 
 # Generate the QR code image
 img = qrcode.make(data)
