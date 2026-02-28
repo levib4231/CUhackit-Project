@@ -76,3 +76,59 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// ... existing initialization ...
+
+async function handleToggleCheckIn() {
+    const gymSelect = document.getElementById('gymSelect');
+    const selectedCourt = gymSelect.value;
+
+    if (!selectedCourt) {
+        alert("Please select a court first.");
+        return;
+    }
+
+    // A. Get the logged-in user
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    
+    if (authError || !user) {
+        alert("You must be logged in to check in.");
+        return;
+    }
+
+    // B. Check if user is ALREADY checked into THIS court
+    const { data: existingCheckIn, error: fetchError } = await supabaseClient
+        .from('CheckIns')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('court_name', selectedCourt)
+        .single();
+
+    if (existingCheckIn) {
+        // --- LOGIC: CHECK OUT ---
+        // 1. Remove the check-in record
+        const { error: deleteError } = await supabaseClient
+            .from('CheckIns')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('court_name', selectedCourt);
+
+        if (!deleteError) {
+            // 2. Decrement the count in the Courts table
+            await supabaseClient.rpc('decrement_court_count', { court_row_name: selectedCourt });
+            alert("Checked out successfully!");
+        }
+    } else {
+        // --- LOGIC: CHECK IN ---
+        // 1. Create the check-in record
+        const { error: insertError } = await supabaseClient
+            .from('CheckIns')
+            .insert([{ user_id: user.id, court_name: selectedCourt }]);
+
+        if (!insertError) {
+            // 2. Increment the count in the Courts table
+            await supabaseClient.rpc('increment_court_count', { court_row_name: selectedCourt });
+            alert("Checked in successfully!");
+        }
+    }
+}
