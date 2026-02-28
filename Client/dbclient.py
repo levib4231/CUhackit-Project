@@ -34,6 +34,22 @@ def check_in_player(qr_token: str, court_id: int):
     result = supabase.table("Sessions").insert(new_session).execute()
     return f"Success! Checked in user ID: {user.data['id']}"
 
+def safe_check_in(user_id: int, court_id: int):
+    # Call the Postgres function we just created
+    response = supabase.rpc("check_in_user", {
+        "p_user_id": user_id, 
+        "p_court_id": court_id
+    }).execute()
+
+    result = response.data
+    
+    if result['success']:
+        print(f"{result['message']}")
+    else:
+        print(f"Rejected: {result['message']}")
+        
+    return result
+
 # Example Usage
 if __name__ == "__main__":
     active = get_active_sessions()
