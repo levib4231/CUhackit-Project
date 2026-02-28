@@ -19,6 +19,7 @@
 
     <div class="menu">
         <a href="#">Dashboard</a>
+        <a href="/CUTRACKIT/FindAMatch/find_a_match.html" class="active">Find Game</a>
         <a href="/CUTRACKIT/JoinTeam/join_team.html">Join Team</a>
         <a href="/CUTRACKIT/CreateTeam/create_team.html">Create Team</a>
         <a href="/CUTRACKIT/LeaderBoards/leaderboards.html">Leader Boards</a>
@@ -73,6 +74,16 @@ Do not attempt to influence or argue with official rulings.
         </div>
     </div>
 
+    <div class="upcoming-games-card">
+    <h2>Your Upcoming Games</h2>
+    <div id="gamesList" class="games-list">
+        <!-- Games injected by JS -->
+    </div>
+    </div>
+
+    <script src="/CUTRACKIT/Dashboard/upcomingGames.js"></script>
+
+
     <div class="events-section">
         <h2 class="section-title">Upcoming Events</h2>
 
@@ -123,6 +134,7 @@ Do not attempt to influence or argue with official rulings.
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="index.js"></script>
 <script src="chart.js"></script>
+
 
 <div class="sidebar-right">
   <div class="sidebar-card">
