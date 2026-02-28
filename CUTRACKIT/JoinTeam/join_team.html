@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html>
-    <meta>charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Join Team</title>
-    <link rel="stylesheet" href="join_team.css">
+<meta>charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join Team</title>
+<link rel="stylesheet" href="join_team.css">
 
 <body>
-    <div class="navbar">
+  <div class="navbar">
     <div class="logo-container">
-        <div class="logo">
-            <img src="/Assets/Clemson_Logo.png" alt="">
-        </div>
-        <div class="company-name">CUTRACKIT</div>
+      <div class="logo">
+        <img src="/Assets/Clemson_Logo.png" alt="">
+      </div>
+      <div class="company-name">CUTRACKIT</div>
     </div>
 
     <div class="menu">
@@ -26,47 +26,48 @@
 
   </div>
 
-    <div class="join-team-page">
-  <h1 class="page-title">Join a Team</h1>
-  
-  <div class="controls-bar">
-    <div class="filters">
-      <button class="filter-btn active" data-size="all">All</button>
-      <button class="filter-btn" data-size="5v5">5v5</button>
-      <button class="filter-btn" data-size="4v4">4v4</button>
-      <button class="filter-btn" data-size="3v3">3v3</button>
-      <button class="filter-btn" data-size="2v2">2v2</button>
-      <button class="filter-btn" data-size="1v1">1v1</button>
+  <div class="join-team-page">
+    <h1 class="page-title">Join a Team</h1>
+
+    <div class="controls-bar">
+      <div class="filters">
+        <button class="filter-btn active" data-size="all">All</button>
+        <button class="filter-btn" data-size="5v5">5v5</button>
+        <button class="filter-btn" data-size="4v4">4v4</button>
+        <button class="filter-btn" data-size="3v3">3v3</button>
+        <button class="filter-btn" data-size="2v2">2v2</button>
+        <button class="filter-btn" data-size="1v1">1v1</button>
+      </div>
+
+      <input type="text" id="searchInput" placeholder="Search teams">
+
+      <select id="sortSelect">
+        <option value="default">Sort By</option>
+        <option value="most">Most Members</option>
+        <option value="least">Least Members</option>
+        <option value="newest">Newest</option>
+        <option value="oldest">Oldest</option>
+      </select>
     </div>
 
-    <input type="text" id="searchInput" placeholder="Search teams">
-
-    <select id="sortSelect">
-      <option value="default">Sort By</option>
-      <option value="most">Most Members</option>
-      <option value="least">Least Members</option>
-      <option value="newest">Newest</option>
-      <option value="oldest">Oldest</option>
-    </select>
+    <div class="team-grid" id="teamGrid"></div>
   </div>
 
-  <div class="team-grid" id="teamGrid"></div>
-</div>
-
-<!-- Team Details Modal -->
-<div class="modal" id="teamModal">
-  <div class="modal-content">
-    <span class="close-modal" id="closeModal">&times;</span>
-    <h2 id="modalTeamName"></h2>
-    <p id="modalTeamSize"></p>
-    <p id="modalTeamMembers"></p>
-    <p id="modalTeamDescription"></p>
-    <button id="modalJoinBtn">Join Team</button>
+  <!-- Team Details Modal -->
+  <div class="modal" id="teamModal">
+    <div class="modal-content">
+      <span class="close-modal" id="closeModal">&times;</span>
+      <h2 id="modalTeamName"></h2>
+      <p id="modalTeamSize"></p>
+      <p id="modalTeamMembers"></p>
+      <p id="modalTeamDescription"></p>
+      <button id="modalJoinBtn">Join Team</button>
+    </div>
   </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script src="join_team.js"></script>
+  <script src="join_team.js"></script>
 </body>
+
 </html>
