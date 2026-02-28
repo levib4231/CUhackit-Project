@@ -1,7 +1,7 @@
 import qrcode # type: ignore
 
 # Data you want to encode
-data = "http://127.0.0.1:5500/CUTRACKIT/Dashboard/index.html"
+data = "https://cuhackit-project.vercel.app"
 
 # Generate the QR code image
 img = qrcode.make(data)
