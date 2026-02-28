@@ -1,0 +1,168 @@
+/* Global responsive adjustments for mobile (iPhone, small tablets) */
+/* This file is linked from every page so that we can define one set of overrides. */
+
+@media (max-width: 600px) {
+  /* navbar bricks into vertical stack */
+  .navbar {
+    flex-direction: column;
+    align-items: center;
+    height: auto;
+    padding: 10px;
+  }
+
+  .logo-container {
+    justify-content: center;
+  }
+
+  .logo img {
+    width: 120px !important;
+    max-width: 80vw;
+  }
+
+  .company-name {
+    font-size: 24px !important;
+    text-align: center;
+  }
+
+  .menu {
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .menu a {
+    font-size: 14px !important;
+    padding: 4px 6px;
+  }
+
+  /* stack columns, remove sidebars */
+  .dashboard-layout,
+  .cards-wrapper,
+  .form-and-preview {
+    flex-direction: column !important;
+    align-items: center;
+    padding: 0 10px;
+  }
+
+  .sidebar-left,
+  .sidebar-right {
+    display: none !important;
+  }
+
+  /* make card components full width but not tiny */
+  .player-card,
+  .traffic-card,
+  .form-card,
+  .preview-card,
+  .login-card,
+  .upcoming-games-card,
+  .event-card,
+  .leaderboards-card {
+    width: 100% !important;
+    max-width: 400px;
+    margin: 0 auto 20px;
+  }
+
+  .player-count {
+    font-size: 100px !important;
+  }
+
+  .page-title,
+  .login-title,
+  .section-title {
+    font-size: 1.6rem !important;
+    text-align: center;
+  }
+
+  .top-page {
+    margin-top: 90px !important;
+  }
+
+  /* hide big backgrounds to improve performance and avoid crowding */
+  .login-background,
+  .create-background {
+    display: none !important;
+  }
+
+  /* prevent body lock on small devices */
+  body {
+    overflow: auto !important;
+  }
+
+  /* ensure tall full‑screen wrappers don't crank height beyond viewport */
+  .login-container,
+  .create-container {
+    height: auto !important;
+    padding-top: 90px !important;
+  }
+
+  /* additional card types */
+  .leaderboard-card,
+  .join-card,
+  .create-card {
+    width: 100% !important;
+    max-width: 400px;
+    margin: 0 auto 20px;
+  }
+
+  /* matchmaking page layout also stacks */
+  .matchmaking-layout {
+    flex-direction: column !important;
+    gap: 20px;
+    padding: 0 10px !important;
+  }
+
+  /* team grid switch to single column to avoid tiny cards */
+  .team-grid {
+    grid-template-columns: 1fr !important;
+    padding-right: 0 !important;
+  }
+
+  /* ensure no element exceeds viewport width */
+  * {
+    max-width: 100vw !important;
+    box-sizing: border-box;
+  }
+
+  /* inputs/buttons remain readable */
+  input,
+  select,
+  textarea,
+  .checkin-btn,
+  .login-btn,
+  #createTeamBtn {
+    font-size: 16px !important;
+  }
+
+  /* carousel adjustments */
+  .carousel-wrapper {
+    width: 100% !important;
+  }
+
+  .carousel-window {
+    overflow-x: auto !important;
+  }
+
+  .event-card {
+    min-width: 180px;
+  }
+
+  /* fallback to full width for any major container children */
+  .dashboard-layout > div,
+  .cards-wrapper > div,
+  .form-and-preview > div,
+  .login-container > div {
+    width: 100% !important;
+  }
+
+  /* reset page-specific outer margins to avoid horizontal scroll */
+  .create-team-page,
+  .join-team-page,
+  .find-match-page,
+  .leaderboards-page,
+  .account-page {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 0 10px;
+  }
+}
