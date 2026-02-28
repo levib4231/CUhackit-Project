@@ -42,8 +42,11 @@ def health():
     return jsonify({"status": "CourtFlow backend running"})
 
 # this route is a protected endpoint that retrieves the user's profile information. It first extracts the user ID from the Supabase JWT token, then queries the PostgreSQL database for the user's profile details (first name, last name, and email) and returns them as a JSON response. If the user is not authenticated or if the profile is not found, it returns appropriate error messages.
-@app.route("/profile", methods=["GET"])
+@app.route("/profile", methods=["GET", "OPTIONS"])
 def get_profile():
+
+    if request.method == "OPTIONS":
+        return jsonify({"status": "OK"}), 200
 
     user_id = get_profile_id_from_token()
     if not user_id:
