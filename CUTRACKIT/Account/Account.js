@@ -1,3 +1,4 @@
+console.log("Account JS running");
 const BACKEND_URL = "http://127.0.0.1:5000"; // change when deployed
 
 const nameInput = document.getElementById("nameInput");
