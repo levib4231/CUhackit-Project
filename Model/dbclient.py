@@ -56,10 +56,8 @@ def get_dashboard_stats():
     """
     Fetches high-level KPIs for the top of the dashboard.
     """
-    # 1. Current players in the building
     active_count = supabase.table("Sessions").select("id", count="exact").is_("check_out_at", "null").execute()
     
-    # 2. Total check-ins today
     today_start = "2026-02-27T00:00:00Z" # You'd generate this dynamically
     daily_count = supabase.table("Sessions").select("id", count="exact").gte("check_in_at", today_start).execute()
     
