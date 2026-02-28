@@ -18,7 +18,7 @@ const previewPassword = document.getElementById("previewPassword");
 // =====================================
 document.addEventListener("DOMContentLoaded", async () => {
 
-    const token = localStorage.getItem("cutrackit_jwt");
+    const token = localStorage.getItem("access_token");
 
     if (!token) {
         console.log("User not logged in.");
