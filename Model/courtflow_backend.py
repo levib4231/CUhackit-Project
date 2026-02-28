@@ -26,17 +26,12 @@ import jwt
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from supabase import create_client
-import pandas as pd
-from flask_cors import CORS
-from twelve_labs_client import TwelveLabsBranch
-
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app)
 
 # =====================================================
 # SUPABASE DATABASE CONNECTION (ENV VARIABLES REQUIRED)
@@ -252,7 +247,6 @@ def check_in():
 # CHECK-OUT ENDPOINT
 # =====================================================
 
-<<<<<<< HEAD:courtflow_backend.py
 
 # The /checkout endpoint allows a user to check out of a court. It performs the following steps:
 # 1. It verifies the user's JWT to ensure they are authenticated.
@@ -276,15 +270,6 @@ def check_out():
     cursor = conn.cursor()
 
     # 3-7: Update session, get court_id, count remaining players, get max_capacity, and update court status
-=======
-def _check_out_user(user_id):
-    """
-    Core transactional logic for checking out a user.
-    Returns a tuple of (success: bool, message: str/dict, status_code: int).
-    """
-    conn = get_db_connection()
-    cursor = conn.cursor()
->>>>>>> b0bc4e3a15f3d9f72b1adf12c54f88124bd1ac26:Model/courtflow_backend.py
     try:
         conn.autocommit = False
 
@@ -301,7 +286,7 @@ def _check_out_user(user_id):
         result = cursor.fetchone()
 
         if not result:
-            return False, {"error": "No active session"}, 404
+            return jsonify({"error": "No active session"}), 404
 
         # Extract court_id from the result of the UPDATE query. This is necessary to identify which court the user was checked into, so that we can update the court's status based on the remaining active sessions.
         court_id = result[0]
@@ -332,29 +317,17 @@ def _check_out_user(user_id):
         """, (status, court_id))
 
         conn.commit()
-        return True, {"message": "Checked out successfully"}, 200
+
+        return jsonify({"message": "Checked out successfully"})
 
     # If any error occurs during the transaction (e.g., database errors, integrity issues), it rolls back the transaction to maintain data integrity and returns an error response with the exception message. This ensures that if something goes wrong during the check-out process, the database state remains consistent and the user receives feedback about the error that occurred.
     except Exception as e:
         conn.rollback()
-        return False, {"error": str(e)}, 500
+        return jsonify({"error": str(e)}), 500
 
     finally:
         cursor.close()
         conn.close()
-
-
-@app.route("/checkout", methods=["POST"])
-def check_out():
-
-    user_id = get_user_from_request()
-
-    if not user_id:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    success, message, status_code = _check_out_user(user_id)
-    
-    return jsonify(message), status_code
 
 
 # =====================================================
@@ -420,171 +393,6 @@ def get_court_status(court_id):
         cursor.close()
         conn.close()
 
-
-# =====================================================
-# FUNCTIONS FROM DBCLIENT
-# =====================================================
-
-def get_active_sessions():
-    """Fetch all players currently on a court (check_out_at is null)."""
-    response = supabase.table("Sessions") \
-        .select("id, check_in_at, Profiles(fname, lname), Courts(name)") \
-        .is_("check_out_at", "null") \
-        .execute()
-    return response.data
-
-def check_in_player(qr_token: str, court_id: int):
-    """Business logic to check in a player via their QR code."""
-    # 1. Find user by token
-    user = supabase.table("Profiles").select("id").eq("qr_code_token", qr_token).single().execute()
-    
-    if not user.data:
-        return "Error: Invalid QR Code"
-
-    # 2. Create the session
-    new_session = {
-        "user_id": user.data['id'],
-        "court_id": court_id
-    }
-    
-    result = supabase.table("Sessions").insert(new_session).execute()
-    return f"Success! Checked in user ID: {user.data['id']}"
-
-def check_out_player(user_id: int):
-    """
-    Finds the active session for a user and sets the check_out_at timestamp to now.
-    Uses the core transactional checkout logic.
-    """
-    success, message, status_code = _check_out_user(user_id)
-    
-    if success:
-        print(f"User {user_id} checked out successfully.")
-        return {"success": True, "data": message}
-    else:
-        print(f"No active session found for User {user_id}.")
-        return {"success": False, "message": message.get("error", "Unknown error")}
-    
-def get_dashboard_stats():
-    """
-    Fetches high-level KPIs for the top of the dashboard.
-    """
-    active_count = supabase.table("Sessions").select("id", count="exact").is_("check_out_at", "null").execute()
-    
-    today_start = "2026-02-27T00:00:00Z" # You'd generate this dynamically
-    daily_count = supabase.table("Sessions").select("id", count="exact").gte("check_in_at", today_start).execute()
-    
-    return {
-        "live_players": active_count.count,
-        "daily_total": daily_count.count
-    }
-
-def get_utilization_data():
-    """
-    Returns data for a Bar Chart showing court occupancy.
-    """
-    response = supabase.table("court_utilization").select("*").execute()
-    return response.data
-
-def get_heatmap_data():
-    """
-    Returns data for a Line Chart showing busiest hours.
-    """
-    response = supabase.table("hourly_traffic").select("*").execute()
-    return response.data
-
-
-def get_session_insights():
-    # Fetch completed sessions
-    response = supabase.table("Sessions").select("check_in_at, check_out_at").not_.is_("check_out_at", "null").execute()
-    
-    df = pd.DataFrame(response.data)
-    
-    # Calculate duration
-    df['check_in_at'] = pd.to_datetime(df['check_in_at'])
-    df['check_out_at'] = pd.to_datetime(df['check_out_at'])
-    df['duration_minutes'] = (df['check_out_at'] - df['check_in_at']).dt.total_seconds() / 60
-    
-    return {
-        "avg_duration": round(df['duration_minutes'].mean(), 1),
-        "max_duration": round(df['duration_minutes'].max(), 1)
-    }
-
-
-tl_branch = TwelveLabsBranch()
-
-def handle_checkout_and_analyze(qr_id, video_file):
-    # 1. Standard Check-out
-    result = check_out_player(qr_id) # Your existing int8 function
-    
-    if result["success"]:
-        # 2. Trigger TwelveLabs Analysis
-        # Note: In a real gym, 'video_file' would be pulled from the court's camera
-        player_name = (supabase.table("Profiles")
-                       .select("fname, lname")
-                       .eq("qr_code_id", qr_id)
-                       .single().execute().data)
-        
-        full_name = f"{player_name['fname']} {player_name['lname']}"
-        
-        # Find highlights for the demo
-        highlights = tl_branch.find_player_highlights(full_name, "scoring a point")
-        
-        return {
-            "status": "Checked Out",
-            "highlights_found": len(highlights),
-            "clips": highlights[:3] # Return top 3 clips for the UI
-        }
-    
-def join_team(user_id: int, team_name: str):
-    """Adds a user to a team by name."""
-    try:
-        # 1. Get the Team ID
-        team = supabase.table("Teams").select("id").eq("name", team_name).single().execute()
-        if not team.data:
-            return {"success": False, "message": "Team not found."}
-        
-        # 2. Insert Membership
-        response = supabase.table("Memberships").insert({
-            "user_id": user_id,
-            "team_id": team.data['id']
-        }).execute()
-        
-        return {"success": True, "message": f"Joined {team_name}!"}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-def leave_team(user_id: int, team_id: int):
-    """Removes a user from a specific team."""
-    try:
-        response = supabase.table("Memberships") \
-            .delete() \
-            .eq("user_id", user_id) \
-            .eq("team_id", team_id) \
-            .execute()
-        
-        return {"success": True, "message": "Left the team."}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-# =====================================================
-# DASHBOARD API
-# =====================================================
-
-@app.route("/api/dashboard_stats", methods=["GET"])
-def api_get_dashboard_stats():
-    """
-    API endpoint for the main dashboard KPIs.
-    """
-    stats = get_dashboard_stats()
-    return jsonify(stats)
-
-@app.route("/api/utilization_data", methods=["GET"])
-def api_get_utilization_data():
-    """
-    API endpoint for court utilization data.
-    """
-    data = get_utilization_data()
-    return jsonify(data)
 
 # =====================================================
 # PRODUCTION SERVER
