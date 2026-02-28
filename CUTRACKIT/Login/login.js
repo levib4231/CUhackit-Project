@@ -1,4 +1,4 @@
-// Global Logout Logic: If user lands on login page, clear any existing session
+// Clear any old custom tokens
 window.addEventListener('DOMContentLoaded', () => {
     localStorage.removeItem('cutrackit_jwt');
     localStorage.removeItem('cutrackit_user_id');
@@ -17,8 +17,9 @@ togglePassword.addEventListener("click", () => {
     passwordInput.type = type;
 });
 
-// Login Validation
+// Login using Supabase Auth
 loginBtn.addEventListener("click", async () => {
+
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
 
@@ -28,46 +29,27 @@ loginBtn.addEventListener("click", async () => {
         return;
     }
 
-    if (!email.includes("@")) {
-        errorMsg.style.color = "#ff4d4d";
-        errorMsg.textContent = "Enter a valid email.";
-        return;
-    }
-
     errorMsg.style.color = "white";
     errorMsg.textContent = "Logging in...";
 
-    try {
-        const response = await fetch('/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
-        });
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+    });
 
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-            errorMsg.style.color = "#00ff99";
-            errorMsg.textContent = "Login successful! Redirecting...";
-
-            // Save state to localStorage
-            localStorage.setItem('cutrackit_jwt', data.jwt);
-            localStorage.setItem('cutrackit_user_id', data.user_id);
-            localStorage.setItem('cutrackit_profile', JSON.stringify(data.profile));
-
-            // Redirect to dashboard
-            setTimeout(() => {
-                window.location.href = '/dashboard';
-            }, 500);
-        } else {
-            errorMsg.style.color = "#ff4d4d";
-            errorMsg.textContent = data.error || "Invalid login credentials.";
-        }
-    } catch (error) {
-        console.error("Login failed:", error);
+    if (error) {
         errorMsg.style.color = "#ff4d4d";
-        errorMsg.textContent = "An error occurred during login. Please try again.";
+        errorMsg.textContent = error.message;
+        return;
     }
+
+    // Store access token for backend usage
+    localStorage.setItem("access_token", data.session.access_token);
+
+    errorMsg.style.color = "#00ff99";
+    errorMsg.textContent = "Login successful! Redirecting...";
+
+    setTimeout(() => {
+        window.location.href = "dashboard.html";
+    }, 500);
 });

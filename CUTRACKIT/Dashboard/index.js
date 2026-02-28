@@ -1,56 +1,117 @@
-// 1. Initialize Supabase Client at the very top
+// Supabase client
 const supabaseUrl = 'https://cixuwmqjrcubiwhgnvlf.supabase.co';
 const supabaseKey = 'sb_publishable_Miz7VAu62K_pZsVZHnGHWQ_7BUVDWmx';
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-// 2. Function to populate the dropdown
+// Change this when deployed
+const BACKEND_URL = "http://localhost:5000";
+
+
+// ============================
+// Populate Court Dropdown
+// ============================
 async function populateGymDropdown() {
-    try {
-        console.log("Attempting to fetch data from 'Courts' table...");
-        
-        const { data, error } = await supabaseClient
-            .from('Courts') 
-            .select('name')
-            .order('name', { ascending: true });
 
-        if (error) {
-            console.error("Supabase Error:", error.message);
-            return;
-        }
+    const { data, error } = await supabaseClient
+        .from('Courts')
+        .select('id, name')
+        .order('name', { ascending: true });
 
-        console.log("Data received from Supabase:", data);
+    if (error) {
+        console.error(error.message);
+        return;
+    }
 
-        const gymSelect = document.getElementById('gymSelect');
-        if (!gymSelect) {
-            console.error("Could not find HTML element with ID 'gymSelect'");
-            return;
-        }
+    const gymSelect = document.getElementById('gymSelect');
 
-        if (data && data.length > 0) {
-            // Keep the placeholder, clear others
-            gymSelect.innerHTML = '<option value="">Select Court</option>';
-            
-            data.forEach(gym => {
-                const option = document.createElement('option');
-                option.value = gym.name;
-                option.textContent = gym.name;
-                gymSelect.appendChild(option);
-            });
-            console.log("Dropdown successfully populated!");
-        } else {
-            console.warn("No data found in the 'Courts' table.");
-        }
-    } catch (err) {
-        console.error("Unexpected Script Error:", err.message);
+    gymSelect.innerHTML = '<option value="">Select Court</option>';
+
+    data.forEach(court => {
+        const option = document.createElement('option');
+        option.value = court.id; // IMPORTANT: use ID now
+        option.textContent = court.name;
+        gymSelect.appendChild(option);
+    });
+}
+
+
+// ============================
+// CHECK IN
+// ============================
+async function checkIn() {
+
+    const select = document.getElementById("gymSelect");
+    const courtId = select.value;
+
+    if (!courtId) {
+        alert("Select a court first.");
+        return;
+    }
+
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+        alert("You must login first.");
+        return;
+    }
+
+    const response = await fetch(`${BACKEND_URL}/checkin`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({
+            court_id: courtId
+        })
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+        alert("Checked in successfully!");
+    } else {
+        alert(result.error);
     }
 }
 
-// 3. Carousel and Initialization
+
+// ============================
+// CHECK OUT
+// ============================
+async function checkOut() {
+
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+        alert("You must login first.");
+        return;
+    }
+
+    const response = await fetch(`${BACKEND_URL}/checkout`, {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+        alert("Checked out successfully!");
+    } else {
+        alert(result.error);
+    }
+}
+
+
+// ============================
+// Load page
+// ============================
 document.addEventListener('DOMContentLoaded', () => {
-    // Run the dropdown fetch immediately on load
+
     populateGymDropdown();
 
-    // Carousel Logic
+    // Carousel logic (unchanged)
     const track = document.getElementById("carouselTrack");
     const nextBtn = document.getElementById("nextBtn");
     const prevBtn = document.getElementById("prevBtn");
