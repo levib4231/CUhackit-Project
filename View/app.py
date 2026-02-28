@@ -2,11 +2,12 @@ import os
 import sys
 from flask import Flask, render_template, jsonify, send_from_directory, request
 from dotenv import load_dotenv
+import supabase
+import courtflow_backend
 
 # Setup Model paths
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'Model'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'Model', 'DraftTwelveLabs'))
-import courtflow_backend
 
 # Setup Flask
 app = Flask(__name__, static_folder='../')
@@ -120,6 +121,16 @@ def api_join_team():
         return jsonify(res)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/api/leaderboard')
+def get_leaderboard():
+    # SQL: Sum points per user, join with Profiles to get names
+    response = supabase.table("Stats") \
+        .select("user_id, Profiles(fname, lname), points.sum()") \
+        .order("points.sum", desc=True) \
+        .execute()
+    
+    return jsonify(response.data)
 
 
 if __name__ == '__main__':

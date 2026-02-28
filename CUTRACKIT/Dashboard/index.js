@@ -23,23 +23,31 @@ prevBtn.addEventListener("click", () => {
 });
 
 // Fetch live player count
+// Initialize Supabase client
+// You get these from your Supabase Project Settings > API
+const supabaseUrl = 'https://cixuwmqjrcubiwhgnvlf.supabase.co'
+const supabaseKey = 'sb_publishable_Miz7VAu62K_pZsVZHnGHWQ_7BUVDWmx'
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 async function fetchPlayerCount() {
     try {
-        const response = await fetch('/api/dashboard_stats');
-        if (response.ok) {
-            const data = await response.json();
-            const countElement = document.querySelector('.player-count');
-            if (countElement && data.live_players !== undefined) {
-                countElement.textContent = data.live_players;
-            }
-        } else {
-            console.error('Failed to fetch player count:', response.statusText);
-        }
-    } catch (error) {
-        console.error('Error fetching player count:', error);
-    }
-}
+        // Query the 'sessions' table (or whatever your session table is named)
+        const { count, error } = await supabaseClient
+            .from('Sessions') 
+            .select('*', { count: 'exact', head: true }) // head: true means "just get the count, not the data"
+            .is('check_out_at', null); // Filter for Null values
 
+        if (error) throw error;
+
+        const countElement = document.querySelector('.player-count');
+        if (countElement) {
+            // 'count' will be an integer representing the rows found
+            countElement.textContent = count ?? 0;
+        }
+
+    } catch (error) {
+        console.error('Error fetching count from Supabase:', error.message);
+    }
+}document.addEventListener('DOMContentLoaded', fetchPlayerCount);
 // Call on load
 document.addEventListener('DOMContentLoaded', fetchPlayerCount);
 

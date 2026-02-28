@@ -48,12 +48,14 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from supabase import create_client
 import pandas as pd
+from flask_cors import CORS
 from twelve_labs_client import TwelveLabsBranch
 
 
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app)
 
 # =====================================================
 # SUPABASE DATABASE CONNECTION (ENV VARIABLES REQUIRED)
@@ -498,6 +500,26 @@ def leave_team(user_id: int, team_id: int):
         return {"success": True, "message": "Left the team."}
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+# =====================================================
+# DASHBOARD API
+# =====================================================
+
+@app.route("/api/dashboard_stats", methods=["GET"])
+def api_get_dashboard_stats():
+    """
+    API endpoint for the main dashboard KPIs.
+    """
+    stats = get_dashboard_stats()
+    return jsonify(stats)
+
+@app.route("/api/utilization_data", methods=["GET"])
+def api_get_utilization_data():
+    """
+    API endpoint for court utilization data.
+    """
+    data = get_utilization_data()
+    return jsonify(data)
 
 # =====================================================
 # PRODUCTION SERVER

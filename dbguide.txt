@@ -1,97 +1,65 @@
-🏀 DATABASE GUIDE: CourtFlow Management System
-Storage Engine: PostgreSQL
-Primary Key Type: int8 (BigInt / 64-bit Integer)
-Timestamp Format: timestamptz (Timezone-aware)
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
 
-1. Table Definitions
-A. Profiles
-
-Stores athlete information and identification tokens.
-
-id (int8, PK): Unique identifier.
-
-fname (text): First name.
-
-lname (text): Last name.
-
-email (text, Unique): Primary contact and login.
-
-qr_code_token (text, Unique): The string encoded in the user's QR code.
-
-B. Courts
-
-Defines the physical spaces being monitored.
-
-id (int8, PK): Unique identifier.
-
-name (text): Display name of the court.
-
-max_capacity (int4): Maximum number of concurrent players allowed.
-
-status (text): Current state (Open, Full, Maintenance).
-
-C. Sessions
-
-The transactional table tracking check-ins and check-outs.
-
-id (int8, PK): Unique identifier.
-
-user_id (int8, FK): Links to Profiles.id.
-
-court_id (int8, FK): Links to Courts.id.
-
-check_in_at (timestamptz): When the user scanned in.
-
-check_out_at (timestamptz, Nullable): When the user scanned out.
-
-2. Relationships & Constraints
-One-to-Many: One User (Profile) can have many Sessions over time.
-
-One-to-Many: One Court can have many Sessions over time.
-
-Unique Constraints: email and qr_code_token must be unique to prevent account duplication and security spoofing.
-
-Referential Integrity: If a Profile is deleted, its Sessions should ideally be restricted or cascaded depending on your data retention policy.
-
-3. SQL Schema (Copy-Paste)
-SQL
--- Initial Table Setup
-CREATE TABLE "Courts" (
-    id int8 GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name text NOT NULL,
-    max_capacity int4 DEFAULT 10,
-    status text DEFAULT 'Open'
+CREATE TABLE public.Courts (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  name text NOT NULL,
+  max_capacity bigint,
+  status text,
+  CONSTRAINT Courts_pkey PRIMARY KEY (id)
 );
-
-CREATE TABLE "Profiles" (
-    id int8 GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    fname text NOT NULL,
-    lname text NOT NULL,
-    email text UNIQUE NOT NULL,
-    qr_code_token text UNIQUE NOT NULL
+CREATE TABLE public.Memberships (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  user_id bigint,
+  team_id bigint,
+  joined_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT Memberships_pkey PRIMARY KEY (id),
+  CONSTRAINT Memberships_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.Profiles(id),
+  CONSTRAINT Memberships_team_id_fkey FOREIGN KEY (team_id) REFERENCES public.Teams(id)
 );
-
-CREATE TABLE "Sessions" (
-    id int8 GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id int8 REFERENCES "Profiles"(id) ON DELETE CASCADE,
-    court_id int8 REFERENCES "Courts"(id) ON DELETE SET NULL,
-    check_in_at timestamptz DEFAULT now(),
-    check_out_at timestamptz
+CREATE TABLE public.Profiles (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  lname text NOT NULL,
+  fname text,
+  email text UNIQUE,
+  qr_code_token bigint,
+  auth_id uuid UNIQUE,
+  qr_code_id bigint UNIQUE,
+  CONSTRAINT Profiles_pkey PRIMARY KEY (id)
 );
-4. Key Queries for Python Integration
-To find "Who is currently on Court 1?":
-
-SQL
-SELECT p.fname, p.lname 
-FROM "Sessions" s
-JOIN "Profiles" p ON s.user_id = p.id
-WHERE s.court_id = 1 AND s.check_out_at IS NULL;
-To check out a user via Python:
-
-Python
-# Logic: Set check_out_at to NOW where it is currently NULL for this user
-supabase.table("Sessions") \
-    .update({"check_out_at": "now()"}) \
-    .eq("user_id", user_id) \
-    .is_("check_out_at", "null") \
-    .execute()
+CREATE TABLE public.Sessions (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  user_id bigint,
+  court_id bigint,
+  check_in_at timestamp with time zone DEFAULT now(),
+  check_out_at timestamp with time zone,
+  CONSTRAINT Sessions_pkey PRIMARY KEY (id),
+  CONSTRAINT Sessions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.Profiles(id),
+  CONSTRAINT Sessions_court_id_fkey FOREIGN KEY (court_id) REFERENCES public.Courts(id)
+);
+CREATE TABLE public.Stats (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  user_id bigint,
+  action_type text,
+  points integer,
+  session_id bigint,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT Stats_pkey PRIMARY KEY (id),
+  CONSTRAINT Stats_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.Profiles(id),
+  CONSTRAINT Stats_session_id_fkey FOREIGN KEY (session_id) REFERENCES public.Sessions(id)
+);
+CREATE TABLE public.Teams (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  name text NOT NULL UNIQUE,
+  coach_id bigint,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT Teams_pkey PRIMARY KEY (id),
+  CONSTRAINT Teams_coach_id_fkey FOREIGN KEY (coach_id) REFERENCES public.Profiles(id)
+);
+CREATE TABLE public.gym_configs (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  opening_time timestamp with time zone NOT NULL DEFAULT now(),
+  closing_time timestamp without time zone,
+  location text,
+  CONSTRAINT gym_configs_pkey PRIMARY KEY (id)
+);
