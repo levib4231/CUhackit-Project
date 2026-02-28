@@ -30,7 +30,8 @@ app = Flask(__name__)
 
 CORS(
     app,
-    resources={r"/*": {"origins": "*"}},
+    origins=["http://127.0.0.1:5500"],
+    supports_credentials=True,
     allow_headers=["Content-Type", "Authorization"],
     methods=["GET", "POST", "OPTIONS"]
 )
@@ -362,4 +363,4 @@ def get_court_status(court_id):
         conn.close()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5500)
+    app.run(host="0.0.0.0", port=5000)
