@@ -14,17 +14,25 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 from supabase import create_client
-import psycopg2
+import psycopg2 
 import psycopg2.extras
 import os
+import jwt
 
 # =====================================================
 # LOAD ENV VARIABLES
 # =====================================================
 load_dotenv()
+SUPABASE_JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET")
+
 
 app = Flask(__name__)
 CORS(app)
+
+# Health check route
+@app.route("/")
+def health():
+    return jsonify({"status": "CourtFlow backend running"})
 
 # =====================================================
 # SUPABASE CLIENT SETUP
@@ -45,19 +53,19 @@ DB_CONFIG = {
     "port": os.environ.get("DB_PORT")
 }
 
+# get_db_connection() is a helper function to connect to the PostgreSQL database using psycopg2. It uses the DB_CONFIG dictionary for connection parameters and includes error handling to print any connection errors that occur.
 def get_db_connection():
-    return psycopg2.connect(**DB_CONFIG)
+    try:
+        return psycopg2.connect(**DB_CONFIG)
+    except Exception as e:
+        print(f"Database connection error: {e}")
+        raise
+
 
 # =====================================================
 # HELPER: GET PROFILE ID FROM SUPABASE TOKEN
 # =====================================================
 def get_profile_id_from_token():
-    """
-    1. Extract Bearer token
-    2. Validate with Supabase
-    3. Get user UUID
-    4. Map to Profiles.id
-    """
 
     auth_header = request.headers.get("Authorization")
     if not auth_header:
@@ -66,15 +74,19 @@ def get_profile_id_from_token():
     try:
         token = auth_header.split(" ")[1]
 
-        # Validate token with Supabase
-        user = supabase.auth.get_user(token)
+        # Decode + verify token manually
+        decoded = jwt.decode(
+            token,
+            SUPABASE_JWT_SECRET,
+            algorithms=["HS256"],
+            audience="authenticated"
+        )
 
-        if not user:
+        auth_uuid = decoded.get("sub")
+
+        if not auth_uuid:
             return None
 
-        auth_uuid = user.user.id
-
-        # Map UUID to Profiles.id
         conn = get_db_connection()
         cursor = conn.cursor()
 
@@ -93,7 +105,8 @@ def get_profile_id_from_token():
 
         return result[0]
 
-    except Exception:
+    except Exception as e:
+        print(f"JWT decoding error: {e}")
         return None
 
 # =====================================================
@@ -131,6 +144,7 @@ def check_in():
 
         # Cleanup old sessions
         cleanup_expired_sessions(cursor)
+        conn.commit()
 
         # Prevent double check-in
         cursor.execute("""
@@ -139,6 +153,7 @@ def check_in():
             AND check_out_at IS NULL;
         """, (user_id,))
         if cursor.fetchone():
+            conn.rollback()
             return jsonify({"error": "Already checked in"}), 400
 
         # Lock court row
@@ -309,4 +324,4 @@ def get_court_status(court_id):
         conn.close()
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0", port=5500)
