@@ -49,7 +49,7 @@ loginBtn.addEventListener("click", async () => {
     }
 
     // Store access token for backend usage
-    localStorage.setItem("access_token", data.session.access_token);
+    localStorage.setItem("cutrackit_jwt", data.session.access_token);
 
     errorMsg.style.color = "#00ff99";
     errorMsg.textContent = "Login successful! Redirecting...";
