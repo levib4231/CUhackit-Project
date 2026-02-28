@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <meta>charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Team</title>
+    <link rel="stylesheet" href="join_team.css">
+    <link rel="stylesheet" href="/CUTRACKIT/">
+
+<body>
+    <div class="navbar">
+    <div class="logo-container">
+        <div class="logo">
+            <img src="/CUTRACKIT/Assets/Clemson_Logo.png" alt="">
+        </div>
+        <div class="company-name">CUTRACKIT</div>
+    </div>
+
+    <div class="menu">
+        <a href="/CUTRACKIT/Dashboard/index.html">Dashboard</a>
+        <a href="#">Join Team</a>
+        <a href="/CUTRACKIT/CreateTeam/create_team.html">Create Team</a>
+        <a href="/CUTRACKIT/LeaderBoards/leaderboards.html">Leader Boards</a>
+        <a href="/CUTRACKIT/Account/account.html">Account</a>
+    </div>
+    </div>
+
+    <div class="join-team-page">
+  <h1 class="page-title">Join a Team</h1>
+  
+  <div class="controls-bar">
+    <div class="filters">
+      <button class="filter-btn active" data-size="all">All</button>
+      <button class="filter-btn" data-size="5v5">5v5</button>
+      <button class="filter-btn" data-size="4v4">4v4</button>
+      <button class="filter-btn" data-size="3v3">3v3</button>
+      <button class="filter-btn" data-size="2v2">2v2</button>
+      <button class="filter-btn" data-size="1v1">1v1</button>
+    </div>
+
+    <input type="text" id="searchInput" placeholder="Search teams...">
+
+    <select id="sortSelect">
+      <option value="default">Sort By</option>
+      <option value="most">Most Members</option>
+      <option value="least">Least Members</option>
+      <option value="newest">Newest</option>
+      <option value="oldest">Oldest</option>
+    </select>
+  </div>
+
+  <div class="team-grid" id="teamGrid"></div>
+</div>
+
+<!-- Team Details Modal -->
+<div class="modal" id="teamModal">
+  <div class="modal-content">
+    <span class="close-modal" id="closeModal">&times;</span>
+    <h2 id="modalTeamName"></h2>
+    <p id="modalTeamSize"></p>
+    <p id="modalTeamMembers"></p>
+    <p id="modalTeamDescription"></p>
+    <button id="modalJoinBtn">Join Team</button>
+  </div>
+</div>
+
+<script src="join_team.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboards</title>
+    <link rel="stylesheet" href="leaderboards.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+    <div class="logo-container">
+        <div class="logo">
+            <img src="/CUTRACKIT/Assets/Clemson_Logo.png" alt="">
+        </div>
+        <div class="company-name">CUTRACKIT</div>
+    </div>
+
+    <div class="menu">
+        <a href="/CUTRACKIT/Dashboard/index.html">Dashboard</a>
+        <a href="/CUTRACKIT/JoinTeam/join_team.html">Join Team</a>
+        <a href="/CUTRACKIT/CreateTeam/create_team.html">Create Team</a>
+        <a href="#">Leader Boards</a>
+        <a href="/CUTRACKIT/Account/account.html">Account</a>
+    </div>
+</div>
+
+<!-- PAGE CONTENT -->
+<div class="leaderboards-page">
+
+    <h1 class="page-title">Leaderboards</h1>
+
+    <div class="controls-bar">
+        <input type="text" id="searchInput" placeholder="Search players...">
+        <select id="filterSelect">
+            <option value="all">All Players</option>
+            <option value="top10">Top 10</option>
+            <option value="top25">Top 25</option>
+        </select>
+    </div>
+
+    <div class="leaderboard-wrapper">
+        <div class="leaderboard-card">
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Games Played</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                    <!-- Rows injected by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script src="leaderboards.js"></script>
+</body>
+</html>
