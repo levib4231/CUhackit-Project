@@ -9,6 +9,13 @@ const sizeInput = document.getElementById("teamSize");
 const descInput = document.getElementById("teamDescription");
 const tagsInput = document.getElementById("teamTags");
 const errorMsg = document.getElementById("errorMsg");
+const successModal = document.getElementById("successModal");
+const closeModal = document.getElementById("closeModal");
+
+// Close modal when close button is clicked
+closeModal.addEventListener("click", () => {
+    successModal.style.display = "none";
+});
 
 // ... (keep your live preview event listeners as they are) ...
 
