@@ -36,9 +36,9 @@ body {
 }
 
 .company-name {
-    font-size: 22px;
+    font-size: 38px;
     font-weight: 600;
-    color: #222;
+    color: #333;
     letter-spacing: 0.5px;
 }
 
@@ -63,14 +63,14 @@ body {
     position: absolute;
     width: 0%;
     height: 2px;
-    background: #0078ff;
+    background: #F56600;
     left: 0;
     bottom: -5px;
     transition: width 0.25s ease;
 }
 
 .menu a:hover {
-    color: #0078ff;
+    color: #F56600;
 }
 
 .menu a:hover::after {
@@ -123,7 +123,8 @@ html, body {
     margin: 0;
     font-size: 30px;
     font-weight: 600;
-    color: #222;
+    font-family: Tiempos, serif;
+    color: #333333;
     letter-spacing: 0.5px;
 }
 
@@ -132,7 +133,7 @@ html, body {
     margin-top: 20px;
     font-size: 200px;
     font-weight: 700;
-    color: #0078ff;
+    color: #F56600;
     letter-spacing: 2px;
     transition: transform 0.2s ease, color 0.2s ease;
 }
@@ -140,7 +141,7 @@ html, body {
 /* HOVER EFFECT */
 .player-card:hover .player-count {
     transform: scale(1.08);
-    color: #005fcc;
+    color: #e86100;
 }
 
 /*----------------------------------------------*/
@@ -164,7 +165,7 @@ html, body {
 .section-title {
     font-size: 26px;
     font-weight: 600;
-    color: #222;
+    color: #333;
     margin-bottom: 20px;
 }
 
@@ -190,7 +191,7 @@ html, body {
 }
 
 .carousel-btn:hover {
-    background: #0078ff;
+    background: #F56600;
     color: #fff;
     transform: scale(1.08);
 }
@@ -232,7 +233,7 @@ html, body {
 .event-card h3 {
     margin: 15px 20px 5px;
     font-size: 18px;
-    color: #222;
+    color: #333;
 }
 
 .event-card p {
@@ -255,7 +256,7 @@ html, body {
     width: 420px;
     height: 275px;
     background: #ffffff;
-    padding: 25px 30px;
+    padding: 15px 30px 37px;
     margin-left: 40px;
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.10);
@@ -263,15 +264,17 @@ html, body {
 
 .traffic-card h2 {
     margin: 0 0 20px 0;
-    font-size: 22px;
+    font-size: 30px;
     font-weight: 600;
-    color: #222;
+    font-family: Tiempos, serif;
+    color: #333;
 }
 
 /* GRAPH AREA */
 .bar-graph {
     display: flex;
     align-items: flex-end;
+    justify-content: space-between;
     gap: 18px;
     height: 200px;
     padding-bottom: 10px;
@@ -282,7 +285,7 @@ html, body {
 /* INDIVIDUAL BAR */
 .bar {
     width: 35px;
-    background: #0078ff;
+    background: #333;
     border-radius: 6px 6px 0 0;
     transition: background 0.2s ease, transform 0.2s ease;
     display: flex;
@@ -309,7 +312,7 @@ html, body {
     margin-top: 15px;
     font-size: 16px;
     font-weight: 600;
-    color: #d10000;
+    color: #333;
 }
 /*----------------------------------------------*/
 .top-page {
@@ -318,5 +321,66 @@ html, body {
     justify-content: center; /* center columns horizontally */
     align-items: flex-start; /* align tops of children */
     gap: 40px;
-    margin-top: 140px; /* spacing underneath navbar */
+    margin-top: 0; /* moved margin to parent container */
+}
+
+/*------------------------------*/
+
+/* LAYOUT */
+.dashboard-layout {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* keep columns at the top so a tall sidebar won’t push content down */
+    gap: 40px;
+    margin-top: 140px; /* adjusted to clear navbar and align children */
+    margin-left: 40px;
+    margin-right: 40px;
+}
+
+/* LEFT SIDEBAR */
+.sidebar-left {
+    width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    /* no height limit here – let the page scroll naturally when content grows */
+}
+
+/* RIGHT SIDEBAR */
+.sidebar-right {
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* MAIN CONTENT */
+.dashboard-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* CARD STYLE */
+.sidebar-card, .main-card {
+    background: #ffffff;
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+}
+
+.sidebar-card h2,
+.main-card h2 {
+    margin: 0 0 15px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #222;
+}
+
+.sidebar-card p,
+.main-card p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.5;
 }
