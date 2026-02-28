@@ -28,7 +28,7 @@ async function populateGymDropdown() {
 
     data.forEach(court => {
         const option = document.createElement('option');
-        option.value = court.id; // IMPORTANT: use ID now
+        option.value = court.id; 
         option.textContent = court.name;
         gymSelect.appendChild(option);
     });
@@ -170,33 +170,31 @@ async function handleToggleCheckIn() {
         return;
     }
 
+    // A. Get the authenticated user (UUID)
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
     if (authError || !user) {
         alert("You must be logged in.");
         return;
     }
 
-    // 1. Get the Profile ID (bigint) using the auth UUID
+    // B. Find the numeric Profile ID using the auth_id
     const { data: profile, error: profileError } = await supabaseClient
         .from('Profiles')
         .select('id')
-        .eq('id', user.id)
+        .eq('auth_id', user.id) // Corrected: searching by auth_id column
         .maybeSingle();
 
     if (profileError || !profile) {
-        console.error("Profile not found for this user:", profileError);
-        alert("Error: Profile record not found.");
+        console.error("Profile not found:", profileError);
+        alert("Error: Profile record not found in database.");
         return;
     }
 
-    // From here on, we use profile.id (the bigint ID)
-    const profileId = profile.id;
-
-    // 2. Check for an active session using the numeric profileId
+    // C. Check for an active session (where check_out_at is null)
     const { data: activeSession, error: sessionError } = await supabaseClient
         .from('Sessions')
-        .select('id, court_id')
-        .eq('user_id', profileId)
+        .select('id')
+        .eq('user_id', profile.id)
         .is('check_out_at', null)
         .maybeSingle();
 
@@ -213,8 +211,10 @@ async function handleToggleCheckIn() {
             .eq('id', activeSession.id);
 
         if (!updateError) {
+            // UI Update: Switch back to Check In
             statusText.textContent = "Status: Inactive";
             checkInBtn.textContent = "Check In";
+            
             await updatePlayerCountUI();
             alert("Checked out successfully!");
         } else {
@@ -225,14 +225,16 @@ async function handleToggleCheckIn() {
         const { error: insertError } = await supabaseClient
             .from('Sessions')
             .insert([{ 
-                user_id: profileId, 
+                user_id: profile.id, 
                 court_id: courtId, 
                 check_in_at: new Date().toISOString() 
             }]);
 
         if (!insertError) {
+            // UI Update: Switch to Check Out
             statusText.textContent = "Status: Checked In";
             checkInBtn.textContent = "Check Out";
+            
             await updatePlayerCountUI();
             alert("Checked in successfully!");
         } else {
