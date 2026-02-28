@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/Dashboard/index.html",
+      "permanent": true
+    }
+  ]
+}
