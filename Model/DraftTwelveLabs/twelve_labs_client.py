@@ -13,7 +13,7 @@ class TwelveLabsBranch:
         """
         Uploads gym footage to be indexed for a specific session.
         """
-        print(f"🚀 Indexing footage for Session {session_id}...")
+        print(f"Indexing footage for Session {session_id}...")
         task = self.client.task.create(
             index_id=self.index_id, 
             file=video_path,
@@ -22,7 +22,7 @@ class TwelveLabsBranch:
         
         # In a hackathon, we wait for completion to show the result immediately
         task.wait_for_done(sleep_interval=5)
-        print(f"✅ Video indexed successfully for Session {session_id}")
+        print(f"Video indexed successfully for Session {session_id}")
         return task.id
 
     def find_player_highlights(self, player_name, action="making a basket"):
@@ -30,7 +30,7 @@ class TwelveLabsBranch:
         Uses Semantic Search to find specific player actions.
         Perfect for the Clemson Tigers Challenge.
         """
-        print(f"🔍 Searching for: {player_name} {action}...")
+        print(f"Searching for: {player_name} {action}...")
         search_results = self.client.search.query(
             index_id=self.index_id,
             query_text=f"{player_name} {action}",
