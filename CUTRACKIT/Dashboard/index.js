@@ -138,65 +138,111 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// ... existing initialization ...
+async function updatePlayerCountUI() {
+    // Count sessions where check_out_at IS NULL
+    const { count, error } = await supabaseClient
+        .from('Sessions')
+        .select('*', { count: 'exact', head: true })
+        .is('check_out_at', null);
 
+    if (error) {
+        console.error("Error fetching player count:", error.message);
+        return;
+    }
+
+    const countDisplay = document.querySelector('.player-count');
+    if (countDisplay) {
+        countDisplay.textContent = count || 0;
+    }
+}
+
+// ============================
+// Toggle Check-In/Out Logic
+// ============================
 async function handleToggleCheckIn() {
-    const select = document.getElementById("gymSelect");
-    const courtId = select.value;
+    const gymSelect = document.getElementById('gymSelect');
+    const courtId = gymSelect.value;
+    const statusText = document.getElementById("statusText");
+    const checkInBtn = document.getElementById("checkInBtn");
 
     if (!courtId) {
         alert("Please select a court first.");
         return;
     }
 
-    // Get current user session
+    // 1. Get the authenticated user
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-    
     if (authError || !user) {
-        alert("You must be logged in to check in.");
+        alert("You must be logged in.");
         return;
     }
 
-    // 1. Check for existing check-in
-    const { data: existing, error: fetchError } = await supabaseClient
-        .from('CheckIns')
-        .select('id, court_id')
-        .eq('user_id', user.id)
-        .maybeSingle(); // Returns null instead of error if not found
+    // 2. Map Auth UUID to Profile ID (BigInt) from your schema
+    const { data: profile, error: profileError } = await supabaseClient
+        .from('Profiles')
+        .select('id')
+        .eq('auth_id', user.id)
+        .single();
 
-    if (fetchError) {
-        console.error("Fetch Error:", fetchError.message);
+    if (profileError || !profile) {
+        console.error("Profile not found:", profileError);
         return;
     }
 
-    if (existing) {
-        // --- LOGIC: CHECK OUT ---
-        const { error: deleteError } = await supabaseClient
-            .from('CheckIns')
-            .delete()
-            .eq('user_id', user.id);
+    // 3. Check for an active session (where check_out_at is NULL)
+    const { data: activeSession } = await supabaseClient
+        .from('Sessions')
+        .select('id')
+        .eq('user_id', profile.id)
+        .is('check_out_at', null)
+        .maybeSingle();
 
-        if (!deleteError) {
-            // Update the count on the court the user was actually checked into
-            await supabaseClient.rpc('decrement_court_count', { court_id_param: existing.court_id });
+    if (activeSession) {
+        // --- ACTION: CHECK OUT ---
+        const { error: updateError } = await supabaseClient
+            .from('Sessions')
+            .update({ check_out_at: new Date().toISOString() })
+            .eq('id', activeSession.id);
+
+        if (!updateError) {
+            statusText.textContent = "Status: Inactive";
+            checkInBtn.textContent = "Check In";
+            checkInBtn.classList.remove('checkout-active'); // Optional CSS class change
+            await updatePlayerCountUI();
             alert("Checked out successfully!");
-        } else {
-            console.error("Delete Error:", deleteError.message);
         }
-
     } else {
-        // --- LOGIC: CHECK IN ---
+        // --- ACTION: CHECK IN ---
         const { error: insertError } = await supabaseClient
-            .from('CheckIns')
-            .insert([{ user_id: user.id, court_id: courtId }]);
+            .from('Sessions')
+            .insert([{ 
+                user_id: profile.id, 
+                court_id: courtId, 
+                check_in_at: new Date().toISOString() 
+            }]);
 
         if (!insertError) {
-            await supabaseClient.rpc('increment_court_count', { court_id_param: courtId });
+            statusText.textContent = "Status: Checked In";
+            checkInBtn.textContent = "Check Out";
+            checkInBtn.classList.add('checkout-active');
+            await updatePlayerCountUI();
             alert("Checked in successfully!");
         } else {
-            // If the user is already checked in elsewhere, the UNIQUE constraint will trigger this
-            alert("Error: " + insertError.message);
-            console.error(insertError);
+            console.error("Check-in failed:", insertError.message);
         }
     }
 }
+
+// ============================
+// Initialization
+// ============================
+document.addEventListener('DOMContentLoaded', () => {
+    populateGymDropdown();
+    updatePlayerCountUI();
+
+    // Attach the toggle logic to the button in your HTML
+    const checkInBtn = document.getElementById("checkInBtn");
+    if (checkInBtn) {
+        checkInBtn.addEventListener("click", handleToggleCheckIn);
+    }
+});
