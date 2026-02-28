@@ -65,18 +65,29 @@ html, body {
     position: absolute;
     width: 0%;
     height: 2px;
-    background: #0078ff;
+    background: #F56600;
     left: 0;
     bottom: -5px;
     transition: width 0.25s ease;
 }
 
 .menu a:hover {
-    color: #0078ff;
+    color: #F56600;
 }
 
 .menu a:hover::after {
     width: 100%;
+}
+
+/* ACTIVE MENU ITEM */
+.menu a.active {
+    color: #F56600;
+    font-weight: 600;
+}
+
+.menu a.active::after {
+    width: 100%;
+    background: #F56600;
 }
 
 /* BACKGROUND */
@@ -221,4 +232,49 @@ input:focus {
     color: #fff;
     font-weight: 600;
     text-decoration: underline;
+}
+/* Mobile navbar optimization */
+@media (max-width: 600px) {
+  .navbar {
+    flex-direction: column;
+    align-items: center;
+    height: auto;
+    padding: 10px;
+  }
+
+  .logo-container {
+    justify-content: center;
+  }
+
+  .logo img {
+    width: 120px !important;
+    max-width: 80vw;
+  }
+
+  .company-name {
+    font-size: 24px !important;
+    text-align: center;
+  }
+
+  .menu {
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .menu a {
+    font-size: 14px !important;
+    padding: 4px 6px;
+  }
+
+  .login-card {
+    width: 90% !important;
+    max-width: 350px !important;
+    margin: 0 auto;
+  }
+
+  /* adjust login container padding to account for vertical navbar */
+  .login-container {
+    padding-top: 0 !important;
+  }
 }
