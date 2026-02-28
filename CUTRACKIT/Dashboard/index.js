@@ -181,7 +181,7 @@ async function handleToggleCheckIn() {
     const { data: profile, error: profileError } = await supabaseClient
         .from('Profiles')
         .select('id')
-        .eq('auth_id', user.id) // Corrected: searching by auth_id column
+        .eq('id', user.id) // Corrected: searching by auth_id column
         .maybeSingle();
 
     if (profileError || !profile) {
