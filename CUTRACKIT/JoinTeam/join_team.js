@@ -1,131 +1,171 @@
-// Shared data model
-let teams = JSON.parse(localStorage.getItem("teams")) || [
-    { name: "Clemson Tigers", size: "5v5", members: 3, description: "Competitive 5v5 squad.", created: Date.now() },
-    { name: "Orange Elite", size: "4v4", members: 2, description: "Looking for shooters.", created: Date.now() - 5000 },
-    { name: "Upstate Warriors", size: "3v3", members: 1, description: "Fast-paced 3v3 team.", created: Date.now() - 10000 },
-    { name: "Palmetto Squad", size: "2v2", members: 2, description: "Strong duo team.", created: Date.now() - 15000 },
-    { name: "Solo Kings", size: "1v1", members: 0, description: "1v1 challengers.", created: Date.now() - 20000 }
-];
+// Initialization
+const supabaseUrl = 'https://cixuwmqjrcubiwhgnvlf.supabase.co';
+const supabaseKey = 'sb_publishable_Miz7VAu62K_pZsVZHnGHWQ_7BUVDWmx';
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+let teams = []; 
+let currentFilter = "all";
+let currentSearch = "";
+let currentSort = "default";
+let selectedTeam = null;
+
+// Grab the UI elements
 const teamGrid = document.getElementById("teamGrid");
-const filterBtns = document.querySelectorAll(".filter-btn");
-const searchInput = document.getElementById("searchInput");
-const sortSelect = document.getElementById("sortSelect");
-
-// Modal elements
-const modal = document.getElementById("teamModal");
+const teamModal = document.getElementById("teamModal");
 const closeModal = document.getElementById("closeModal");
 const modalTeamName = document.getElementById("modalTeamName");
 const modalTeamSize = document.getElementById("modalTeamSize");
 const modalTeamMembers = document.getElementById("modalTeamMembers");
 const modalTeamDescription = document.getElementById("modalTeamDescription");
 const modalJoinBtn = document.getElementById("modalJoinBtn");
+const searchInput = document.getElementById("searchInput");
 
-let currentFilter = "all";
-let currentSearch = "";
-let currentSort = "default";
-let selectedTeam = null;
+// Initial load from Supabase
+document.addEventListener('DOMContentLoaded', fetchTeams);
 
-// Render teams
+// Search listener
+if (searchInput) {
+    searchInput.addEventListener("input", () => {
+        currentSearch = searchInput.value;
+        renderTeams();
+    });
+}
+
+async function fetchTeams() {
+    try {
+        console.log("Fetching live teams and member counts...");
+        // Fetch teams and count related memberships in one go
+        const { data, error } = await supabaseClient
+            .from('Teams')
+            .select(`
+                *,
+                Memberships(count)
+            `);
+
+        if (error) throw error;
+        
+        teams = data;
+        renderTeams();
+    } catch (err) {
+        console.error("Error loading teams:", err.message);
+        teamGrid.innerHTML = `<p class="error">Failed to load teams: ${err.message}</p>`;
+    }
+}
+
+// Handle closing the modal
+closeModal.addEventListener("click", () => {
+    teamModal.style.display = "none";
+});
+
+window.addEventListener("click", (event) => {
+    if (event.target === teamModal) {
+        teamModal.style.display = "none";
+    }
+});
+
+// Join Team Logic
+modalJoinBtn.addEventListener("click", async () => {
+    try {
+        const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+        if (authError || !user) throw new Error("You must be logged in to join a team.");
+
+        // Check if already a member
+        const { data: existing } = await supabaseClient
+            .from('Memberships')
+            .select('*')
+            .eq('team_id', selectedTeam.id)
+            .eq('user_id', user.id)
+            .single();
+
+        if (existing) throw new Error("You are already in this team!");
+
+        // Insert into Memberships
+        const { error: joinError } = await supabaseClient
+            .from('Memberships')
+            .insert([{ 
+                team_id: selectedTeam.id, 
+                user_id: user.id 
+            }]);
+
+        if (joinError) throw joinError;
+
+        alert(`Successfully joined ${selectedTeam.name}!`);
+
+        // Refresh UI
+        await fetchTeams(); 
+        teamModal.style.display = "none";        
+
+    } catch (err) {
+        alert(err.message);
+    }
+});
+
 function renderTeams() {
     teamGrid.innerHTML = "";
 
     let filtered = teams.filter(team => {
-        return (currentFilter === "all" || team.size === currentFilter) &&
-            team.name.toLowerCase().includes(currentSearch.toLowerCase());
+        const name = team.name || "";
+        const matchesFilter = (currentFilter === "all" || team.team_size === currentFilter);
+        const matchesSearch = name.toLowerCase().includes(currentSearch.toLowerCase());
+        return matchesFilter && matchesSearch;
     });
 
-    if (currentSort === "most") filtered.sort((a, b) => b.members - a.members);
-    if (currentSort === "least") filtered.sort((a, b) => a.members - b.members);
-    if (currentSort === "newest") filtered.sort((a, b) => b.created - a.created);
-    if (currentSort === "oldest") filtered.sort((a, b) => a.created - b.created);
+    if (filtered.length === 0) {
+        teamGrid.innerHTML = "<p>No teams found matching your criteria.</p>";
+        return;
+    }
 
     filtered.forEach(team => {
         const card = document.createElement("div");
         card.classList.add("team-card");
 
+        const memberCount = team.Memberships?.[0]?.count || 0;
+        const shortDesc = team.description ? team.description.substring(0, 60) + "..." : "No description.";
+
         card.innerHTML = `
-            <h3>${team.name}</h3>
-            <p>Size: ${team.size}</p>
-            <p>Members: ${team.members}</p>
+            <h3>${team.name || "Unnamed Team"}</h3>
+            <p><strong>Size:</strong> ${team.team_size}</p>
+            <p><strong>Members:</strong> ${memberCount}</p> 
+            <p class="card-desc">${shortDesc}</p>
             <button class="view-btn">View Details</button>
         `;
 
-        card.querySelector(".view-btn").addEventListener("click", () => openModal(team));
+        card.querySelector(".view-btn").addEventListener("click", () => {
+            selectedTeam = { ...team, memberCount }; 
+            openModal(selectedTeam);
+        });
 
         teamGrid.appendChild(card);
     });
 }
 
-// Modal logic
-function openModal(team) {
+async function openModal(team) {
     selectedTeam = team;
-    modalTeamName.textContent = team.name;
-    modalTeamSize.textContent = `Team Size: ${team.size}`;
-    modalTeamMembers.textContent = `Members: ${team.members}`;
-    modalTeamDescription.textContent = team.description;
-    modal.style.display = "flex";
-}
+    
+    // Set basic text
+    modalTeamName.textContent = team.name || "Unnamed Team";
+    modalTeamSize.textContent = `Team Size: ${team.team_size}`;
+    modalTeamMembers.textContent = `Current Members: ${team.memberCount || 0}`;
+    modalTeamDescription.textContent = team.description || "No description provided.";
 
-closeModal.addEventListener("click", () => {
-    modal.style.display = "none";
-});
+    // Check if user is already a member to disable button
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    const { data: isMember } = await supabaseClient
+        .from('Memberships')
+        .select('*')
+        .eq('team_id', team.id)
+        .eq('user_id', user?.id)
+        .single();
 
-// Join team
-modalJoinBtn.addEventListener("click", async () => {
-    try {
-        const response = await fetch('/api/join_team', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            // Assuming user_id is 1 for testing purposes until auth is built
-            body: JSON.stringify({ user_id: 1, team_name: selectedTeam.name })
-        });
-
-        const data = await response.json();
-        if (data.success) {
-            alert(data.message || `Successfully joined ${selectedTeam.name}!`);
-            selectedTeam.members++;
-            saveTeams();
-            renderTeams();
-        } else {
-            alert(data.message || data.error || "Failed to join team.");
-        }
-    } catch (error) {
-        console.error("Error joining team:", error);
-        alert("An error occurred while joining the team.");
+    if (isMember) {
+        modalJoinBtn.textContent = "Already a Member";
+        modalJoinBtn.disabled = true;
+        modalJoinBtn.style.opacity = "0.5";
+    } else {
+        modalJoinBtn.textContent = "Join Team";
+        modalJoinBtn.disabled = false;
+        modalJoinBtn.style.opacity = "1";
     }
 
-    modal.style.display = "none";
-});
-
-// Save to localStorage
-function saveTeams() {
-    localStorage.setItem("teams", JSON.stringify(teams));
+    teamModal.style.display = "flex";
 }
-
-// Filters
-filterBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-        document.querySelector(".filter-btn.active").classList.remove("active");
-        btn.classList.add("active");
-        currentFilter = btn.dataset.size;
-        renderTeams();
-    });
-});
-
-// Search
-searchInput.addEventListener("input", () => {
-    currentSearch = searchInput.value;
-    renderTeams();
-});
-
-// Sort
-sortSelect.addEventListener("change", () => {
-    currentSort = sortSelect.value;
-    renderTeams();
-});
-
-// Initial load
-renderTeams();

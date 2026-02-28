@@ -1,5 +1,7 @@
-// Load existing teams or create empty list
-let teams = JSON.parse(localStorage.getItem("teams")) || [];
+// Initialization (ensure these variables are defined or imported)
+const supabaseUrl = 'https://cixuwmqjrcubiwhgnvlf.supabase.co';
+const supabaseKey = 'sb_publishable_Miz7VAu62K_pZsVZHnGHWQ_7BUVDWmx';
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
 // Form elements
 const nameInput = document.getElementById("teamName");
@@ -8,80 +10,62 @@ const descInput = document.getElementById("teamDescription");
 const tagsInput = document.getElementById("teamTags");
 const errorMsg = document.getElementById("errorMsg");
 
-// Preview elements
-const previewName = document.getElementById("previewName");
-const previewSize = document.getElementById("previewSize");
-const previewDesc = document.getElementById("previewDesc");
-const previewTags = document.getElementById("previewTags");
+// ... (keep your live preview event listeners as they are) ...
 
-// Modal
-const successModal = document.getElementById("successModal");
-const closeModal = document.getElementById("closeModal");
-
-// Live preview updates
-nameInput.addEventListener("input", () => {
-    previewName.textContent = nameInput.value || "Team Name";
-});
-
-sizeInput.addEventListener("change", () => {
-    previewSize.textContent = `Team Size: ${sizeInput.value}`;
-});
-
-descInput.addEventListener("input", () => {
-    previewDesc.textContent = descInput.value || "Description will appear here.";
-});
-
-tagsInput.addEventListener("input", () => {
-    previewTags.textContent = tagsInput.value ? `Tags: ${tagsInput.value}` : "";
-});
-
-// Create team
-document.getElementById("createTeamBtn").addEventListener("click", () => {
+// Create team in Supabase
+document.getElementById("createTeamBtn").addEventListener("click", async () => {
     const name = nameInput.value.trim();
     const size = sizeInput.value;
     const desc = descInput.value.trim();
     const tags = tagsInput.value.trim();
 
-    // Validation
+    // 1. Validation
     if (!name) {
-        errorMsg.textContent = "Team name cannot be empty.";
+        showError("Team name cannot be empty.");
         return;
     }
 
-    if (teams.some(t => t.name.toLowerCase() === name.toLowerCase())) {
-        errorMsg.textContent = "A team with this name already exists.";
-        return;
+    try {
+        // 2. Get the current user session
+        const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+
+        if (authError || !user) {
+            throw new Error("You must be signed in to create a team.");
+        }
+
+        // 3. Insert into Supabase 'Teams' table
+        const { data, error: insertError } = await supabaseClient
+            .from('Teams')
+            .insert([
+                {
+                    name: name,
+                    team_size: size,        // Matches the new 'team_size' column
+                    description: desc,      // Matches the new 'description' column
+                    tags: tags,             // Matches the new 'tags' column
+                    coach_id: user.id
+                }
+            ]);
+
+        if (insertError) {
+            if (insertError.code === '23505') throw new Error("Team name already exists.");
+            throw insertError;
+        }
+
+        // 4. Success handling
+        errorMsg.textContent = "";
+        successModal.style.display = "flex";
+
+        // Clear form
+        nameInput.value = "";
+        descInput.value = "";
+        tagsInput.value = "";
+
+    } catch (err) {
+        showError(err.message);
     }
-
-    // Create team object
-    const newTeam = {
-        name,
-        size,
-        members: 0,
-        description: desc || "No description provided.",
-        tags,
-        created: Date.now()
-    };
-
-    // Save to localStorage
-    teams.push(newTeam);
-    localStorage.setItem("teams", JSON.stringify(teams));
-
-    // Reset form
-    nameInput.value = "";
-    descInput.value = "";
-    tagsInput.value = "";
-    previewName.textContent = "Team Name";
-    previewDesc.textContent = "Description will appear here.";
-    previewTags.textContent = "";
-
-    errorMsg.textContent = "";
-
-    // Show success modal
-    successModal.style.display = "flex";
 });
 
-// Close modal
-closeModal.addEventListener("click", () => {
-    successModal.style.display = "none";
-});
+function showError(msg) {
+    errorMsg.style.color = "#ff4d4d";
+    errorMsg.textContent = msg;
+}
