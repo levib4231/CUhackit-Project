@@ -34,6 +34,38 @@ CORS(app)
 def health():
     return jsonify({"status": "CourtFlow backend running"})
 
+# this route is a protected endpoint that retrieves the user's profile information. It first extracts the user ID from the Supabase JWT token, then queries the PostgreSQL database for the user's profile details (first name, last name, and email) and returns them as a JSON response. If the user is not authenticated or if the profile is not found, it returns appropriate error messages.
+@app.route("/profile", methods=["GET"])
+def get_profile():
+
+    user_id = get_profile_id_from_token()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    try:
+        cursor.execute("""
+            SELECT fname, lname, email
+            FROM "Profiles"
+            WHERE id = %s;
+        """, (user_id,))
+
+        profile = cursor.fetchone()
+
+        if not profile:
+            return jsonify({"error": "Profile not found"}), 404
+
+        return jsonify({
+            "fname": profile["fname"],
+            "lname": profile["lname"],
+            "email": profile["email"]
+        })
+
+    finally:
+        cursor.close()
+        conn.close()
 # =====================================================
 # SUPABASE CLIENT SETUP
 # =====================================================
