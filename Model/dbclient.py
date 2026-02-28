@@ -52,6 +52,31 @@ def safe_check_in(user_id: int, court_id: int):
         
     return result
 
+def check_out_player(user_id: int):
+    """
+    Finds the active session for a user and sets the check_out_at timestamp to now.
+    """
+    try:
+        # 1. Update the session where check_out_at is NULL for this specific user
+        # We use .is_("check_out_at", "null") to ensure we only touch the active session
+        response = supabase.table("Sessions") \
+            .update({"check_out_at": datetime.now().isoformat()}) \
+            .eq("user_id", user_id) \
+            .is_("check_out_at", "null") \
+            .execute()
+
+        # 2. Verify if a row was actually updated
+        if len(response.data) > 0:
+            print(f"User {user_id} checked out successfully.")
+            return {"success": True, "data": response.data[0]}
+        else:
+            print(f"No active session found for User {user_id}.")
+            return {"success": False, "message": "No active session found."}
+
+    except Exception as e:
+        print(f"Database Error: {str(e)}")
+        return {"success": False, "error": str(e)}
+    
 def get_dashboard_stats():
     """
     Fetches high-level KPIs for the top of the dashboard.
