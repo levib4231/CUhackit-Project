@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const { data: profile, error: profileError } = await supabaseClient
             .from('Profiles')
             .select('fname, lname, email')
-            .eq('auth_id', user.id)
+            .eq('id', user.id)
             .maybeSingle();
 
         if (profileError) throw profileError;
