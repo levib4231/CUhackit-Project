@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account</title>
+    <link rel="stylesheet" href="account.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+    <div class="logo-container">
+        <div class="logo">
+            <img src="/CUTRACKIT/Assets/Clemson_Logo.png" alt="">
+        </div>
+        <div class="company-name">CUTRACKIT</div>
+    </div>
+
+    <div class="menu">
+        <a href="/CUTRACKIT/Dashboard/index.html">Dashboard</a>
+        <a href="/CUTRACKIT/JoinTeam/join_team.html">Join Team</a>
+        <a href="/CUTRACKIT/CreateTeam/create_team.html">Create Team</a>
+        <a href="/CUTRACKIT/LeaderBoards/leaderboards.html">Leader Boards</a>
+        <a href="#">Account</a>
+    </div>
+</div>
+
+<!-- PAGE CONTENT -->
+<div class="account-page">
+
+    <h1 class="page-title">My Account</h1>
+
+    <div class="account-layout">
+
+        <!-- EDIT CARD -->
+        <div class="account-card">
+            <h2>Edit Profile</h2>
+
+            <label>Full Name</label>
+            <input type="text" id="nameInput" placeholder="Enter your name">
+
+            <label>Email</label>
+            <input type="email" id="emailInput" placeholder="Enter your email">
+
+            <label>New Password</label>
+            <input type="password" id="passwordInput" placeholder="Enter new password">
+
+            <label>Confirm Password</label>
+            <input type="password" id="confirmPasswordInput" placeholder="Confirm new password">
+
+            <button id="saveBtn" class="save-btn">Save Changes</button>
+
+            <p class="error-msg" id="errorMsg"></p>
+        </div>
+
+        <!-- PREVIEW CARD -->
+        <div class="preview-card">
+            <h2>Profile Preview</h2>
+
+            <p class="preview-label">Name</p>
+            <p id="previewName" class="preview-value">Your Name</p>
+
+            <p class="preview-label">Email</p>
+            <p id="previewEmail" class="preview-value">your@email.com</p>
+
+            <p class="preview-label">Password</p>
+            <p id="previewPassword" class="preview-value">••••••••</p>
+        </div>
+
+    </div>
+</div>
+
+<script src="account.js"></script>
+</body>
+</html>
