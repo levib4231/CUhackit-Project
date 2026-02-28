@@ -122,3 +122,30 @@ passwordInput.addEventListener("input", () => {
 });
 
 
+// =====================================
+// Save changes (UNCHANGED)
+// =====================================
+saveBtn.addEventListener("click", () => {
+    const name = nameInput.value.trim();
+    const email = emailInput.value.trim();
+    const pass = passwordInput.value.trim();
+    const confirm = confirmPasswordInput.value.trim();
+
+    if (!name || !email) {
+        errorMsg.textContent = "Name and email cannot be empty.";
+        return;
+    }
+
+    if (!email.includes("@")) {
+        errorMsg.textContent = "Enter a valid email.";
+        return;
+    }
+
+    if (pass && pass !== confirm) {
+        errorMsg.textContent = "Passwords do not match.";
+        return;
+    }
+
+    errorMsg.style.color = "#00a651";
+    errorMsg.textContent = "Profile updated!";
+});
