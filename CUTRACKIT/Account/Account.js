@@ -1,6 +1,11 @@
 console.log("Account JS running");
 const BACKEND_URL = "http://127.0.0.1:5000"; // change when deployed
 
+const supabaseUrl = 'https://cixuwmqjrcubiwhgnvlf.supabase.co';
+const supabaseKey = 'sb_publishable_Miz7VAu62K_pZsVZHnGHWQ_7BUVDWmx';
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+
 const nameInput = document.getElementById("nameInput");
 const emailInput = document.getElementById("emailInput");
 const passwordInput = document.getElementById("passwordInput");
