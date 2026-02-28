@@ -1,6 +1,11 @@
-import supabase 
-#new comment
 import os
+from dotenv import load_dotenv
+from supabase import create_client, Client
+
+load_dotenv()
+url: str = os.environ.get("SUPABASE_URL")
+key: str = os.environ.get("SUPABASE_KEY")
+supabase: Client = create_client(url, key)
 def sign_up_user(email, password, first_name, last_name):
     # 1. Create the user in Supabase Auth
     res = supabase.auth.sign_up({
@@ -23,14 +28,34 @@ def sign_up_user(email, password, first_name, last_name):
 
 
 def login_user(email, password):
-    res = supabase.auth.sign_in_with_password({
-        "email": email,
-        "password": password,
-    })
-    
-    # This is your JWT
-    jwt = res.session.access_token
-    refresh_token = res.session.refresh_token
-    
-    print(f"Login successful. Your JWT: {jwt}")
-    return jwt
+    try:
+        res = supabase.auth.sign_in_with_password({
+            "email": email,
+            "password": password,
+        })
+        
+        jwt = res.session.access_token
+        user_id = res.user.id
+        
+        # Fetch user profile to get names and other details
+        profile_res = supabase.table("Profiles").select("*").eq("id", user_id).execute()
+        profile = profile_res.data[0] if profile_res.data else {}
+        
+        print(f"Login successful for {email}")
+        return {
+            "success": True, 
+            "jwt": jwt, 
+            "user_id": user_id, 
+            "profile": profile
+        }
+    except Exception as e:
+        print(f"Login error: {str(e)}")
+        return {"success": False, "error": str(e)}
+
+def logout_user():
+    # Attempt to sign out of the current Supabase auth session on the backend
+    try:
+        supabase.auth.sign_out()
+        return {"success": True}
+    except Exception as e:
+        return {"success": False, "error": str(e)}

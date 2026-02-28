@@ -1,13 +1,14 @@
 import os
 import sys
-from flask import Flask, render_template, jsonify, send_from_directory, request
-from dotenv import load_dotenv
-import supabase
-import courtflow_backend
 
 # Setup Model paths
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'Model'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'Model', 'DraftTwelveLabs'))
+
+from flask import Flask, render_template, jsonify, send_from_directory, request
+from dotenv import load_dotenv
+import supabase
+import courtflow_backend
 
 # Setup Flask
 app = Flask(__name__, static_folder='../')
@@ -27,7 +28,7 @@ def dashboard():
 
 @app.route('/login')
 def login():
-    return send_from_directory('../CUTRACKIT/Login', 'index.html')
+    return send_from_directory('../CUTRACKIT/Login', 'login.html')
 
 @app.route('/account')
 def account():
@@ -51,6 +52,32 @@ def leaderboards():
 
 
 # ----- API ENDPOINTS -----
+
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    import authLogic
+    data = request.json
+    email = data.get('email')
+    password = data.get('password')
+    
+    if not email or not password:
+        return jsonify({"error": "Missing email or password"}), 400
+        
+    result = authLogic.login_user(email, password)
+    if result.get("success"):
+        return jsonify(result)
+    else:
+        return jsonify({"error": result.get("error")}), 401
+
+@app.route('/api/logout', methods=['POST'])
+def api_logout():
+    import authLogic
+    result = authLogic.logout_user()
+    if result.get("success"):
+        return jsonify({"message": "Successfully logged out"})
+    else:
+        return jsonify({"error": result.get("error")}), 500
+
 
 @app.route('/api/dashboard_stats')
 def get_dashboard_stats():
