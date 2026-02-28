@@ -78,6 +78,17 @@ html, body {
     width: 100%;
 }
 
+/* ACTIVE MENU ITEM */
+.menu a.active {
+    color: #F56600;
+    font-weight: 600;
+}
+
+.menu a.active::after {
+    width: 100%;
+    background: #F56600;
+}
+
 
 /* PAGE CONTENT */
 .find-game-page {
