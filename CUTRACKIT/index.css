@@ -1,7 +1,25 @@
-.topbar {
-    min-height: 64px;
+/* Hover effect for top bar menu links */
+.topbar .nav-link {
+    position: relative;
+    transition: color 0.2s ease;
 }
 
-.nav-link:hover {
-    text-decoration: underline;
+.topbar .nav-link:hover {
+    color: #0d6efd; /* Bootstrap primary blue */
+}
+
+/* animated underline */
+.topbar .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 2px;
+    width: 0;
+    height: 2px;
+    background-color: #0d6efd;
+    transition: width 0.2s ease;
+}
+
+.topbar .nav-link:hover::after {
+    width: 100%;
 }
