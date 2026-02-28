@@ -1,4 +1,5 @@
-import supabase
+import supabase 
+#new comment
 import os
 def sign_up_user(email, password, first_name, last_name):
     # 1. Create the user in Supabase Auth
