@@ -5,6 +5,11 @@ window.addEventListener('DOMContentLoaded', () => {
     localStorage.removeItem('cutrackit_profile');
 });
 
+const supabaseUrl = 'https://cixuwmqjrcubiwhgnvlf.supabase.co';
+const supabaseKey = 'sb_publishable_Miz7VAu62K_pZsVZHnGHWQ_7BUVDWmx';
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+
 const emailInput = document.getElementById("emailInput");
 const passwordInput = document.getElementById("passwordInput");
 const loginBtn = document.getElementById("loginBtn");
@@ -50,6 +55,6 @@ loginBtn.addEventListener("click", async () => {
     errorMsg.textContent = "Login successful! Redirecting...";
 
     setTimeout(() => {
-        window.location.href = "dashboard.html";
+        window.location.href = "../Dashboard/index.html";
     }, 500);
 });
