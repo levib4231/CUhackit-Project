@@ -26,7 +26,7 @@ Object.entries(trafficData).forEach(([day, value]) => {
 
     // Color busiest day red
     if (day === busiestDay) {
-        bar.style.background = "#d10000";
+        bar.style.background = "#F56600";
     }
 
     // Add day label
