@@ -384,3 +384,45 @@ html, body {
     color: #555;
     line-height: 1.5;
 }
+
+/*-----------------------------------------------*/
+
+.upcoming-games-card {
+    background: #ffffff;
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+    width: 80%;
+}
+
+.upcoming-games-card h2 {
+    margin: 0 0 15px 0;
+    font-size: 22px;
+    font-weight: 600;
+    color: #222;
+}
+
+.games-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.game-item {
+    padding: 15px;
+    border-radius: 10px;
+    background: #f8f8f8;
+    border: 1px solid #ddd;
+}
+
+.game-item h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.game-item p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #555;
+}
