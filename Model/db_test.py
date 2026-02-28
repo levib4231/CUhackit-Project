@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 # Load environment variables
-#env_path = Path(__file__).parent / '.env' dotenv_path=env_path
 load_dotenv()
 
 def test_db_connection():

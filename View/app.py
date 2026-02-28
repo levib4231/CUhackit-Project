@@ -4,7 +4,8 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 
 # 1. Setup
-load_dotenv()
+dotenv_path = os.path.join(os.path.dirname(__file__), '..', 'Model', '.env')
+load_dotenv(dotenv_path=dotenv_path)
 app = Flask(__name__)
 
 # 2. Supabase Connection
