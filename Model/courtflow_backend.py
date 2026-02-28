@@ -513,6 +513,14 @@ def api_get_dashboard_stats():
     stats = get_dashboard_stats()
     return jsonify(stats)
 
+@app.route("/api/utilization_data", methods=["GET"])
+def api_get_utilization_data():
+    """
+    API endpoint for court utilization data.
+    """
+    data = get_utilization_data()
+    return jsonify(data)
+
 # =====================================================
 # PRODUCTION SERVER
 # =====================================================
