@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from supabase import create_client, Client
 import pandas as pd
 from datetime import datetime
+from twelve_labs_client import TwelveLabsBranch
 
 load_dotenv()
 
@@ -121,6 +122,32 @@ def get_session_insights():
         "avg_duration": round(df['duration_minutes'].mean(), 1),
         "max_duration": round(df['duration_minutes'].max(), 1)
     }
+
+
+tl_branch = TwelveLabsBranch()
+
+def handle_checkout_and_analyze(qr_id, video_file):
+    # 1. Standard Check-out
+    result = check_out_player(qr_id) # Your existing int8 function
+    
+    if result["success"]:
+        # 2. Trigger TwelveLabs Analysis
+        # Note: In a real gym, 'video_file' would be pulled from the court's camera
+        player_name = (supabase.table("Profiles")
+                       .select("fname, lname")
+                       .eq("qr_code_id", qr_id)
+                       .single().execute().data)
+        
+        full_name = f"{player_name['fname']} {player_name['lname']}"
+        
+        # Find highlights for the demo
+        highlights = tl_branch.find_player_highlights(full_name, "scoring a point")
+        
+        return {
+            "status": "Checked Out",
+            "highlights_found": len(highlights),
+            "clips": highlights[:3] # Return top 3 clips for the UI
+        }
 
 # Example Usage
 if __name__ == "__main__":
