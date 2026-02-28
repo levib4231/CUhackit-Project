@@ -27,7 +27,14 @@ SUPABASE_JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET")
 
 
 app = Flask(__name__)
-CORS(app)
+
+CORS(
+    app,
+    origins=["http://127.0.0.1:5500"],
+    supports_credentials=True,
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "OPTIONS"]
+)
 
 # Health check route
 @app.route("/")
