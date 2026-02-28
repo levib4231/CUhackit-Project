@@ -1,5 +1,8 @@
 
 from http import client
+import load_dotenv
+
+load_dotenv()
 
 def demo_player_recognition():
     # 1. Path to your local sample video
