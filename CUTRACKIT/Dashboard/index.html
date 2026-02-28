@@ -8,26 +8,26 @@
 </head>
 <body>
 
-<!-- NAVBAR -->
 <div class="navbar">
     <div class="logo-container">
         <div class="logo">
-            <img src="Assets/Clemson_Logo.png" alt="">
+            <img src="../Assets/Clemson_Logo.png" alt="Clemson Logo">
         </div>
         <div class="company-name">CUTRACKIT</div>
     </div>
 
     <div class="menu">
-      <a href="/Dashboard/index.html">Dashboard</a>
-      <a href="/FindAMatch/find_a_match.html" class="active">Find Game</a>
-      <a href="/JoinTeam/join_team.html">Join Team</a>
-      <a href="/CreateTeam/create_team.html">Create Team</a>
-      <a href="/LeaderBoards/leaderboards.html">Leader Boards</a>
-      <a href="/Account/account.html">Account</a>
-      <a href="/Login/login.html" class="logout-btn">Logout</a>
+      <a href="index.html">Dashboard</a>
+      <a href="../FindAMatch/find_a_match.html" class="active">Find Game</a>
+      <a href="../JoinTeam/join_team.html">Join Team</a>
+      <a href="../CreateTeam/create_team.html">Create Team</a>
+      <a href="../LeaderBoards/leaderboards.html">Leader Boards</a>
+      <a href="../CreateAccount/create_account.html">Account</a>
+      <a href="../Login/login.html" class="logout-btn">Logout</a>
     </div>
 
 </div>
+
 <div class="dashboard-layout">
 
 <div class="sidebar-left">
@@ -45,8 +45,7 @@
     Report suspicious behavior or rule violations to staff immediately.<br><br>
     Stay active and participate consistently if you join a team or event.<br><br>
     Follow your team captain’s instructions and respect team decisions.<br><br>
-
-Do not join multiple teams in the same bracket unless explicitly allowed.
+    Do not join multiple teams in the same bracket unless explicitly allowed.
     </p>
     <h2>Event & Participation Rules</h2>
     <p>
@@ -54,10 +53,8 @@ Do not join multiple teams in the same bracket unless explicitly allowed.
       Notify your team or staff if you cannot attend a scheduled event.<br><br>
       Follow all event‑specific rules, including bracket formats and match procedures.<br><br>
       Respect referees, moderators, and event organizers at all times.<br><br>
-
-Do not attempt to influence or argue with official rulings.
+      Do not attempt to influence or argue with official rulings.
     </p>
-
   </div>
 </div>
     
@@ -65,11 +62,18 @@ Do not attempt to influence or argue with official rulings.
     <div class="cards-wrapper">
         <div class="player-card">
             <h2>Current Players in Gym</h2>
-            <div class="player-count"></div>
+            <div class="player-count">0</div>
+            <div class="action-row">
+                <button id="checkInBtn" class="checkin-btn">Check In</button>
+                <div id="statusText" class="status-text">Status: Inactive</div>
+                <select id="gymSelect" class="gym-select">
+                    <option value="">Select Court</option>
+                </select>
+            </div>
         </div>
         <div class="traffic-card">
             <h2>Weekly Gym Traffic</h2>
-            <div class="bar-graph" id="barGraph"> <!-- Bars will be injected by JS --> </div>
+            <div class="bar-graph" id="barGraph"> </div>
             <div class="busy-label" id="busyLabel"></div>
         </div>
     </div>
@@ -77,11 +81,10 @@ Do not attempt to influence or argue with official rulings.
     <div class="upcoming-games-card">
     <h2>Your Upcoming Games</h2>
     <div id="gamesList" class="games-list">
-        <!-- Games injected by JS -->
-    </div>
+        </div>
     </div>
 
-    <script src="/CUTRACKIT/Dashboard/upcomingGames.js"></script>
+    <script src="upcomingGames.js"></script>
 
 
     <div class="events-section">
@@ -94,31 +97,31 @@ Do not attempt to influence or argue with official rulings.
                 <div class="carousel-track" id="carouselTrack">
                     
                     <div class="event-card">
-                        <img src="/CUTRACKIT/Assets/Photo_1.jpeg" alt="">
+                        <img src="../Assets/Photo_1.jpeg" alt="Yoga">
                         <h3>Yoga Class</h3>
                         <p>Monday • 6:00 PM</p>
                     </div>
 
                     <div class="event-card">
-                        <img src="/CUTRACKIT/Assets/Photo_2.jpeg" alt="">
+                        <img src="../Assets/Photo_2.jpeg" alt="Strength">
                         <h3>Strength Training</h3>
                         <p>Tuesday • 5:30 PM</p>
                     </div>
 
                     <div class="event-card">
-                        <img src="/CUTRACKIT/Assets/Photo_3.jpeg" alt="">
+                        <img src="../Assets/Photo_3.jpeg" alt="HIIT">
                         <h3>HIIT Session</h3>
                         <p>Wednesday • 7:00 PM</p>
                     </div>
 
                     <div class="event-card">
-                        <img src="/CUTRACKIT/Assets/Photo_1.jpeg" alt="">
+                        <img src="../Assets/Photo_2.jpeg" alt="Spin">
                         <h3>Spin Class</h3>
                         <p>Thursday • 6:30 PM</p>
                     </div>
 
                     <div class="event-card">
-                        <img src="/CUTRACKIT/Assets/Photo_1.jpeg" alt="">
+                        <img src="../Assets/Photo_1.jpeg" alt="Pilates">
                         <h3>Pilates</h3>
                         <p>Friday • 5:00 PM</p>
                     </div>
@@ -139,19 +142,12 @@ Do not attempt to influence or argue with official rulings.
 <div class="sidebar-right">
   <div class="sidebar-card">
     <h1>Announcements</h1>
-
     <h2>Important Update</h2>
-    <p>
-      The Spring Tournament schedule will be posted next week, featuring multiple brackets and skill divisions. Registration will open shortly after the announcement.</p>
-
-    <p>Monthly community events are being planned to encourage collaboration and friendly competition. These events will include special challenges and limited-time rewards.</p>
-
-    <p>New scrimmage calendar is being added to help teams schedule practice matches. Teams will be able to reserve time slots directly from the dashboard.</p>
-
-    <p>A Clemson‑themed seasonal event is in development and will include exclusive badges and cosmetic rewards. More details will be shared soon.</p>
-
-    <p>Tournament brackets will now update live as matches are completed. This ensures players always have the latest standings without needing to refresh.</p>
-    
+    <p>The Spring Tournament schedule will be posted next week, featuring multiple brackets and skill divisions. Registration will open shortly after the announcement.</p>
+    <p>Monthly community events are being planned to encourage collaboration and friendly competition.</p>
+    <p>New scrimmage calendar is being added to help teams schedule practice matches.</p>
+    <p>A Clemson‑themed seasonal event is in development and will include exclusive badges.</p>
+    <p>Tournament brackets will now update live as matches are completed.</p>
   </div>
 </div>
 </div>

@@ -1,53 +1,78 @@
-const track = document.getElementById("carouselTrack");
-const nextBtn = document.getElementById("nextBtn");
-const prevBtn = document.getElementById("prevBtn");
-
-let position = 0;
-const cardWidth = 320; // 300px + 20px gap
-const visibleCards = 3;
-const totalCards = track.children.length;
-const maxPosition = -(cardWidth * (totalCards - visibleCards));
-
-nextBtn.addEventListener("click", () => {
-    if (position > maxPosition) {
-        position -= cardWidth;
-        track.style.transform = `translateX(${position}px)`;
-    }
-});
-
-prevBtn.addEventListener("click", () => {
-    if (position < 0) {
-        position += cardWidth;
-        track.style.transform = `translateX(${position}px)`;
-    }
-});
-
-// Fetch live player count
-// Initialize Supabase client
-// You get these from your Supabase Project Settings > API
-const supabaseUrl = 'https://cixuwmqjrcubiwhgnvlf.supabase.co'
-const supabaseKey = 'sb_publishable_Miz7VAu62K_pZsVZHnGHWQ_7BUVDWmx'
+// 1. Initialize Supabase Client at the very top
+const supabaseUrl = 'https://cixuwmqjrcubiwhgnvlf.supabase.co';
+const supabaseKey = 'sb_publishable_Miz7VAu62K_pZsVZHnGHWQ_7BUVDWmx';
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-async function fetchPlayerCount() {
+
+// 2. Function to populate the dropdown
+async function populateGymDropdown() {
     try {
-        // Query the 'sessions' table (or whatever your session table is named)
-        const { count, error } = await supabaseClient
-            .from('Sessions') 
-            .select('*', { count: 'exact', head: true }) // head: true means "just get the count, not the data"
-            .is('check_out_at', null); // Filter for Null values
+        console.log("Attempting to fetch data from 'Courts' table...");
+        
+        const { data, error } = await supabaseClient
+            .from('Courts') 
+            .select('name')
+            .order('name', { ascending: true });
 
-        if (error) throw error;
-
-        const countElement = document.querySelector('.player-count');
-        if (countElement) {
-            // 'count' will be an integer representing the rows found
-            countElement.textContent = count ?? 0;
+        if (error) {
+            console.error("Supabase Error:", error.message);
+            return;
         }
 
-    } catch (error) {
-        console.error('Error fetching count from Supabase:', error.message);
-    }
-}document.addEventListener('DOMContentLoaded', fetchPlayerCount);
-// Call on load
-document.addEventListener('DOMContentLoaded', fetchPlayerCount);
+        console.log("Data received from Supabase:", data);
 
+        const gymSelect = document.getElementById('gymSelect');
+        if (!gymSelect) {
+            console.error("Could not find HTML element with ID 'gymSelect'");
+            return;
+        }
+
+        if (data && data.length > 0) {
+            // Keep the placeholder, clear others
+            gymSelect.innerHTML = '<option value="">Select Court</option>';
+            
+            data.forEach(gym => {
+                const option = document.createElement('option');
+                option.value = gym.name;
+                option.textContent = gym.name;
+                gymSelect.appendChild(option);
+            });
+            console.log("Dropdown successfully populated!");
+        } else {
+            console.warn("No data found in the 'Courts' table.");
+        }
+    } catch (err) {
+        console.error("Unexpected Script Error:", err.message);
+    }
+}
+
+// 3. Carousel and Initialization
+document.addEventListener('DOMContentLoaded', () => {
+    // Run the dropdown fetch immediately on load
+    populateGymDropdown();
+
+    // Carousel Logic
+    const track = document.getElementById("carouselTrack");
+    const nextBtn = document.getElementById("nextBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    let position = 0;
+    const cardWidth = 320;
+
+    if (track && nextBtn && prevBtn) {
+        const totalCards = track.children.length;
+        const maxPosition = -(cardWidth * (totalCards - 3));
+
+        nextBtn.addEventListener("click", () => {
+            if (position > maxPosition) {
+                position -= cardWidth;
+                track.style.transform = `translateX(${position}px)`;
+            }
+        });
+
+        prevBtn.addEventListener("click", () => {
+            if (position < 0) {
+                position += cardWidth;
+                track.style.transform = `translateX(${position}px)`;
+            }
+        });
+    }
+});
