@@ -1,55 +1,55 @@
-// 1. Setup Supabase first so it's ready for functions to use
+// 1. Initialize Supabase Client at the very top
 const supabaseUrl = 'https://cixuwmqjrcubiwhgnvlf.supabase.co';
 const supabaseKey = 'sb_publishable_Miz7VAu62K_pZsVZHnGHWQ_7BUVDWmx';
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-// 2. Define the Dropdown Function
+// 2. Function to populate the dropdown
 async function populateGymDropdown() {
     try {
+        console.log("Attempting to fetch data from 'Courts' table...");
+        
         const { data, error } = await supabaseClient
             .from('Courts') 
             .select('name')
             .order('name', { ascending: true });
 
-        if (error) throw error;
+        if (error) {
+            console.error("Supabase Error:", error.message);
+            return;
+        }
+
+        console.log("Data received from Supabase:", data);
 
         const gymSelect = document.getElementById('gymSelect');
-        if (gymSelect && data) {
-            // Keep "Select Gym" placeholder, clear hardcoded Fike/Underground
-            gymSelect.innerHTML = '<option value="">Select Gym</option>';
+        if (!gymSelect) {
+            console.error("Could not find HTML element with ID 'gymSelect'");
+            return;
+        }
+
+        if (data && data.length > 0) {
+            // Keep the placeholder, clear others
+            gymSelect.innerHTML = '<option value="">Select Court</option>';
+            
             data.forEach(gym => {
                 const option = document.createElement('option');
                 option.value = gym.name;
                 option.textContent = gym.name;
                 gymSelect.appendChild(option);
             });
+            console.log("Dropdown successfully populated!");
+        } else {
+            console.warn("No data found in the 'Courts' table.");
         }
     } catch (err) {
-        console.error('Dropdown Error:', err.message);
+        console.error("Unexpected Script Error:", err.message);
     }
 }
 
-// 3. Define Player Count Function
-async function fetchPlayerCount() {
-    try {
-        const { count, error } = await supabaseClient
-            .from('Sessions') 
-            .select('*', { count: 'exact', head: true })
-            .is('check_out_at', null);
-
-        if (error) throw error;
-        const countElement = document.querySelector('.player-count');
-        if (countElement) countElement.textContent = count ?? 0;
-    } catch (err) {
-        console.error('Counter Error:', err.message);
-    }
-}
-
-// 4. Initialize everything once the HTML is loaded
+// 3. Carousel and Initialization
 document.addEventListener('DOMContentLoaded', () => {
-    fetchPlayerCount();
+    // Run the dropdown fetch immediately on load
     populateGymDropdown();
-    
+
     // Carousel Logic
     const track = document.getElementById("carouselTrack");
     const nextBtn = document.getElementById("nextBtn");
