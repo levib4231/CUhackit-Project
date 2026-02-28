@@ -141,15 +141,15 @@ document.addEventListener('DOMContentLoaded', () => {
 // ... existing initialization ...
 
 async function handleToggleCheckIn() {
-    const gymSelect = document.getElementById('gymSelect');
-    const selectedCourt = gymSelect.value;
+    const select = document.getElementById("gymSelect");
+    const courtId = select.value;
 
-    if (!selectedCourt) {
+    if (!courtId) {
         alert("Please select a court first.");
         return;
     }
 
-    // A. Get the logged-in user
+    // Get current user session
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
     
     if (authError || !user) {
@@ -157,39 +157,46 @@ async function handleToggleCheckIn() {
         return;
     }
 
-    // B. Check if user is ALREADY checked into THIS court
-    const { data: existingCheckIn, error: fetchError } = await supabaseClient
+    // 1. Check for existing check-in
+    const { data: existing, error: fetchError } = await supabaseClient
         .from('CheckIns')
-        .select('*')
+        .select('id, court_id')
         .eq('user_id', user.id)
-        .eq('court_name', selectedCourt)
-        .single();
+        .maybeSingle(); // Returns null instead of error if not found
 
-    if (existingCheckIn) {
+    if (fetchError) {
+        console.error("Fetch Error:", fetchError.message);
+        return;
+    }
+
+    if (existing) {
         // --- LOGIC: CHECK OUT ---
-        // 1. Remove the check-in record
         const { error: deleteError } = await supabaseClient
             .from('CheckIns')
             .delete()
-            .eq('user_id', user.id)
-            .eq('court_name', selectedCourt);
+            .eq('user_id', user.id);
 
         if (!deleteError) {
-            // 2. Decrement the count in the Courts table
-            await supabaseClient.rpc('decrement_court_count', { court_row_name: selectedCourt });
+            // Update the count on the court the user was actually checked into
+            await supabaseClient.rpc('decrement_court_count', { court_id_param: existing.court_id });
             alert("Checked out successfully!");
+        } else {
+            console.error("Delete Error:", deleteError.message);
         }
+
     } else {
         // --- LOGIC: CHECK IN ---
-        // 1. Create the check-in record
         const { error: insertError } = await supabaseClient
             .from('CheckIns')
-            .insert([{ user_id: user.id, court_name: selectedCourt }]);
+            .insert([{ user_id: user.id, court_id: courtId }]);
 
         if (!insertError) {
-            // 2. Increment the count in the Courts table
-            await supabaseClient.rpc('increment_court_count', { court_row_name: selectedCourt });
+            await supabaseClient.rpc('increment_court_count', { court_id_param: courtId });
             alert("Checked in successfully!");
+        } else {
+            // If the user is already checked in elsewhere, the UNIQUE constraint will trigger this
+            alert("Error: " + insertError.message);
+            console.error(insertError);
         }
     }
 }
