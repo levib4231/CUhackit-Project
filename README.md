@@ -1,6 +1,6 @@
 # CUhackit-Project
 
-This is a simple web app I made for a hackathon project at college. The goal was to build a front‑end interface that lets users create accounts, join teams, find games, and keep track of scores and upcoming matches. It's mostly HTML/CSS/JS with a tiny Python backend to handle authentication and basic logic.
+This is a Full Stack web app made for a hackathon project at college. The goal was to build a front‑end interface that lets users create accounts, join teams, find games, and keep track of scores and upcoming matches. It's mostly HTML/CSS/JS and Python for backend to handle authentication.
 
 ## Structure
 
