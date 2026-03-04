@@ -1,6 +1,6 @@
 # CUhackit-Project
 
-This is a Full Stack web app made for a hackathon project at college. The goal was to build a front‑end interface that lets users create accounts, join teams, find games, and keep track of scores and upcoming matches. It's mostly HTML/CSS/JS and Python for backend to handle authentication.
+This is a Full Stack web app made in CUHackit26 hackathon at Clemson University. The goal was to build a front‑end interface that lets users create accounts, join teams, find games, and keep track of scores and upcoming matches. It's mostly HTML/CSS/JS and Python for backend to handle authentication.
 
 ## Structure
 
