@@ -70,6 +70,7 @@ Clone the repository
 ```bash
 git clone https://github.com/levib4231/CUhackit-Project
 cd CUhackit-Project
+```
 
 You can preview the UI by opening `CUTRACKIT/index.html` in your browser or running a simple file server:
 ```
